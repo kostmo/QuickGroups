@@ -1,0 +1,57 @@
+.login-info {
+	float: right;
+}
+
+.main_instructions {
+	font-family: serif;
+}
+
+.status_message {
+	font-family: serif;
+	display: block;
+}
+
+#group_list {
+	border-radius: 5px;
+    background-color: rgb(120,120,255);
+	list-style-type: none;
+	margin: 0.5em; 
+	padding: 0.5em; 
+}
+
+#group_list li {
+	font-weight: bold;
+	background-color: rgb(200,200,255);
+	margin-top: .3em;
+	margin-bottom: .3em;
+	padding: .3em;
+	border-radius: 4px;
+}
+
+#group_list li:hover {
+	background-color: rgb(240,240,255);
+}
+
+#group_list li:active {
+	background-color: rgb(255,160,160);
+}
+
+
+#left {
+	padding: 0.5em; 
+    width: 175px;
+    float: left;
+	margin: 0.4 em;
+    border-radius: 5px;
+    background-color: rgb(240,240,255);
+}
+
+
+
+#right {
+    margin-left:200px; /* Change this to whatever the width of your left column is*/
+}
+
+.clear {
+    clear: both;
+}

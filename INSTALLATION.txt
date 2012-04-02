@@ -1,0 +1,7 @@
+INSTALLATION
+==============================
+
+Credentials:
+
+* Create a file in the WEB-INF directory called "postgresql.properties".
+* Create a file in the WEB-INF directory called "activedirectory.properties".
