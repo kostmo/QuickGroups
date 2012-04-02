@@ -1,4 +1,4 @@
-<html><head><title>Active Directory lookup</title>
+<html><head><title>Quick Groups</title>
 <link rel='stylesheet' href='style/jquery.ui.all.css'>
 <script src='scripts/jquery-1.7.1.js'></script>
 <script src='scripts/ui/jquery.ui.core.js'></script>
@@ -15,13 +15,14 @@
 
 <script type="text/javascript">
 var logged_in_username = "<%= request.getRemoteUser() %>";
+var company_domain = "example.com";	// FIXME
 </script>
 
 </head><body style='font-family: sans-serif'>
 
 <div class='login-info'>Logged in as <b><%= request.getRemoteUser() %></b></div>
 
-<h1>AD Grouper</h1>
+<h1>Quick Groups</h1>
 <span class="main_instructions" id="instructions_no_groups" style="display: none">Click "New group" to begin.</span>
 <span class="status_message" id="status_message">Loading...</span>
 

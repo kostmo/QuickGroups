@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.kostmo.grouper.LdapHelper.MisconfigurationException;
 import com.kostmo.grouper.persistence.Group;
 import com.kostmo.grouper.persistence.GroupMember;
 import com.kostmo.grouper.persistence.PostgresData;
@@ -83,6 +84,9 @@ public class LoadDataServlet extends HttpServlet {
 				}
 				
 			} catch (SQLException e) {
+				e.printStackTrace();
+			} catch (MisconfigurationException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

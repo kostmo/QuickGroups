@@ -1,7 +1,16 @@
 INSTALLATION
 ==============================
 
-Credentials:
+Credentials
+-----------
 
 * Create a file in the WEB-INF directory called "postgresql.properties".
 * Create a file in the WEB-INF directory called "activedirectory.properties".
+* Set up Active Directory credentials in the server.xml file in your Tomcat container
+   * If you are running a server inside Eclipse, this file will be underneath "~/workspace/Servers"
+
+Database
+--------
+* Install PostgreSQL server
+* Run the SQL scripts (TODO)
+

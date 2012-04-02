@@ -12,13 +12,20 @@ import com.unboundid.ldap.sdk.SearchScope;
 
 public class LdapHelper {
 	
-	public static Properties getLdapProperties(HttpServlet servlet) {
+	public static class MisconfigurationException extends Exception {
+		public MisconfigurationException(String format) {
+			super(format);
+		}
+	}
+	
+	public static Properties getLdapProperties(HttpServlet servlet) throws MisconfigurationException {
 
+		String location = "/WEB-INF/ldap.properties";
 		Properties ldap_properties = new Properties();
 		try {
-			ldap_properties.load(servlet.getServletContext().getResourceAsStream("/WEB-INF/ldap.properties"));
+			ldap_properties.load(servlet.getServletContext().getResourceAsStream(location));
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new MisconfigurationException( String.format("You need to create the file \"%s\"", location) );
 		}
 		
 		return ldap_properties;

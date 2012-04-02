@@ -147,12 +147,16 @@ function saveGroup() {
 
 	console.log("Saving group with label: " + group_label );
 	
+	// TODO We could check for all dirty groups and implement a "Save All" command
 	var groups = {};
 	groups[new_group.label] = new_group.asDictionary();
 	
+	var action_type = new_group.id < 0 ? "insert" : "modify";
+	console.log("About to save group with this action: " + action_type + "; Group ID: " + new_group.id);
+	
 	var jsonString = JSON.stringify(groups);
 	$.post("save", {
-			action: "insert",
+			action: action_type,
 			json: jsonString,
 		},
 		function(data) {

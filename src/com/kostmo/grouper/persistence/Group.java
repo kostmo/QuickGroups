@@ -26,6 +26,35 @@ public class Group implements JsonSerializable {
 		this.is_self_serve = is_self_serve;
 		this.owner = owner;
 	}
+
+	public static Group newFromJSON(JSONObject json_object, String owner_alias) throws SQLException {
+
+		Group g = new Group(
+				(Long) json_object.get("id"),
+				json_object.get("label").toString(),
+				(Boolean) json_object.get("is_public"),
+				(Boolean) json_object.get("is_self_serve"),
+				owner_alias
+				);
+		
+		JSONObject members_as_dicts = (JSONObject) json_object.get("members_as_dicts");
+		for (Object item_key : members_as_dicts.keySet()) {
+			String alias = item_key.toString();
+			GroupMember member = new GroupMember(g.id, alias, owner_alias);
+			g.group_members.add(member);
+		}
+		
+		return g;
+	}
+	
+
+	public boolean hasMember(String alias) {
+		for (GroupMember group_member : group_members)
+			if (group_member.alias.equals(alias))
+				return true;
+		
+		return false;
+	}
 	
 	public static Group newFromResultSet(ResultSet rs) throws SQLException {
 		return new Group(

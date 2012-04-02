@@ -18,6 +18,7 @@ import org.json.simple.JSONObject;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
+import com.kostmo.grouper.LdapHelper.MisconfigurationException;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;

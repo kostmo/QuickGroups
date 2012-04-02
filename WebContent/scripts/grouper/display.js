@@ -205,7 +205,7 @@ function showGroup(group_id) {
 //		member_object.modified
 //		member_object.set_by
 		html_string += renderMemberItem(group_object, member_object.alias);
-		email_addresses.push(alias + "@company.com");	// TODO
+		email_addresses.push(alias + "@" + company_domain);
 	});
 	
 	$( "#member_count" ).html( sorted_dictionary_keys.length + " member(s)." );

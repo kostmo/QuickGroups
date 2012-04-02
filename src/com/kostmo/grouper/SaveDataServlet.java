@@ -16,6 +16,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.kostmo.grouper.LdapHelper.MisconfigurationException;
+import com.kostmo.grouper.persistence.Group;
 import com.kostmo.grouper.persistence.PostgresData;
 
 @WebServlet("/save")
@@ -34,16 +36,17 @@ public class SaveDataServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 
-		String action = request.getParameter("action");
+		String action_type = request.getParameter("action");
+		System.out.println("Serverside, will perform this action: " + action_type);
 		
 		JSONObject result_object = null;
-		if ("insert".equals(action)) {
+		if ("insert".equals(action_type)) {
 			result_object = insertAction(request);
-		} else if ("copy".equals(action)) {
+		} else if ("copy".equals(action_type)) {
 			result_object = copyAction(request);
-		} else if ("delete".equals(action)) {
+		} else if ("delete".equals(action_type)) {
 			result_object = deleteAction(request);
-		} else if ("modify".equals(action)) {
+		} else if ("modify".equals(action_type)) {
 			result_object = modifyAction(request);
 		} else {
 			result_object.put("success", false);
@@ -83,6 +86,9 @@ public class SaveDataServlet extends HttpServlet {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (MisconfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		return json_output_object;
@@ -105,6 +111,9 @@ public class SaveDataServlet extends HttpServlet {
 			json_output_object.put("success", true);
 			
 		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MisconfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -135,7 +144,7 @@ public class SaveDataServlet extends HttpServlet {
 				String group_name = entry.toString();
 				JSONObject group_json_object = (JSONObject) json_input_object.get(entry);
 				
-				group_id = PostgresData.insertNewGroup(postgres_connection, group_json_object, request.getRemoteUser());
+				group_id = PostgresData.insertNewGroup(postgres_connection, Group.newFromJSON(group_json_object, request.getRemoteUser()));
 			}
 
 			json_output_object.put("success", true);
@@ -146,6 +155,9 @@ public class SaveDataServlet extends HttpServlet {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (MisconfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		return json_output_object;
@@ -154,8 +166,6 @@ public class SaveDataServlet extends HttpServlet {
 	// ========================================================================
 	private JSONObject modifyAction(HttpServletRequest request) {
 
-		// FIXME
-		
 		String json_input_string = request.getParameter("json");
 		JSONParser parser = new JSONParser();
 		JSONObject json_input_object = null;
@@ -165,24 +175,21 @@ public class SaveDataServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 		int entry_set_size = json_input_object.entrySet().size();
-		
-		
-		// TODO Persist groups to database.
-		
-		
+
 
 		try {
 			Connection postgres_connection = PostgresData.getPostgresConnection(this);
 			
-			
 			for (Object entry : json_input_object.keySet()) {
-				String group_name = entry.toString();
+
 				JSONObject group_json_object = (JSONObject) json_input_object.get(entry);
-				
-				PostgresData.insertNewGroup(postgres_connection, group_json_object, request.getRemoteUser());
+				PostgresData.updateGroup(postgres_connection, Group.newFromJSON(group_json_object, request.getRemoteUser()));
 			}
 
 		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MisconfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
