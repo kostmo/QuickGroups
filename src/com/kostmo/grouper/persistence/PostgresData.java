@@ -163,7 +163,7 @@ public class PostgresData {
 
 			for (GroupMember member : group_object.group_members) {
 				member_insertion_statement.setString(1, member.alias);
-				member_insertion_statement.setLong(2, member.group_id);
+				member_insertion_statement.setLong(2, group_id);
 				member_insertion_statement.setString(3, member.set_by);
 
 				int status2 = member_insertion_statement.executeUpdate();

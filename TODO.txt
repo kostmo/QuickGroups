@@ -1,0 +1,2 @@
+* Full Name/Alias radio selector not working
+* Show/hide "Bulk actions:", rename as "Advanced..."

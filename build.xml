@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="default" name="Create Deployable WAR for QuickGroups" basedir=".">
+
+	<description>
+		Website .war build file
+		Consult http://stackoverflow.com/questions/1001714/how-to-create-war-files
+	</description>
+
+  <!-- set global properties for this build -->
+  <property name="dist.dir" value="dist"/>
+  <property environment="env"/>
+  <property name="warfile.name" value="quickgroups.war"/>
+
+
+  <target name="default" depends="setup,compile,buildwar,deploy"></target>
+
+
+<target name="setup">
+  <mkdir dir="${dist.dir}" />
+  <echo>Copying web into dist</echo>
+
+  <copy todir="${dist.dir}/web">
+    <fileset dir="WebContent"/>
+  </copy>
+
+  <copy todir="${dist.dir}/web/WEB-INF/lib">
+    <fileset dir="lib"/>
+  </copy>
+
+</target>
+
+
+
+
+<target name="compile">
+
+    <delete dir="${dist.dir}/web/WEB-INF/classes" />
+    <mkdir dir="${dist.dir}/web/WEB-INF/classes" />
+    <javac destdir="${dist.dir}/web/WEB-INF/classes" srcdir="src" debug="on" debuglevel="lines,vars,source">
+        <classpath>
+            <fileset dir="${dist.dir}/web/WEB-INF/lib">
+                  <include name="**/*.jar" />
+            </fileset>
+            <fileset dir="${env.TOMCAT_HOME}/lib">
+                  <include name="*" />
+            </fileset>
+        </classpath>
+    </javac>
+
+    <copy todir="${dist.dir}/web/WEB-INF/classes">
+        <fileset dir="src">
+            <include name="**/*.properties" />
+            <include name="**/*.xml" />
+        </fileset>
+    </copy>
+</target>
+
+
+
+<target name="buildwar">
+    <war basedir="${basedir}/dist/web" destfile="${warfile.name}" webxml="${basedir}/dist/web/WEB-INF/web.xml">
+        <exclude name="WEB-INF/**" />
+        <lib dir="${dist.dir}/web/WEB-INF/lib">
+            <include name="**/*.jar" />
+        </lib>
+	<classes dir="${dist.dir}/web/WEB-INF/classes">
+	    <include name="**/*.class" />
+	</classes>
+	<zipfileset dir="config" prefix="WEB-INF" includes="**/*.properties"/>
+    </war>
+</target>
+
+<target name="deploy">
+	<!-- TODO -->
+</target>
+
+</project>
