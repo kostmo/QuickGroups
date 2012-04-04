@@ -38,14 +38,16 @@
 
 
 #left {
-	padding: 0.5em; 
     width: 175px;
     float: left;
+}
+
+#outer_grouplist_container {
+	padding: 0.5em; 
 	margin: 0.4 em;
     border-radius: 5px;
     background-color: rgb(240,240,255);
 }
-
 
 
 #right {

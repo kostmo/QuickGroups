@@ -67,7 +67,16 @@ $(window).bind('beforeunload', function(){
 });
 
 //============================================================================
-function changeAutocompleteSource(radio_element) {
+function toggle_advanced_bulk_options(link_element) {
+	
+	var bulk_options_section = $("#advanced_bulk_options");
+	bulk_options_section.toggle();
+	var is_visible = bulk_options_section.is(":visible");
+	$(link_element).text( (is_visible ? "Hide Advanced <<": "Show Advanced >>") );
+}
+
+//============================================================================
+function changeAutocompleteSource(radio_button) {
 	var radio_button_value = $(radio_button).val();
 	$( "#namefield" ).autocomplete( "option", "source", "search?field=" + radio_button_value );
 }
