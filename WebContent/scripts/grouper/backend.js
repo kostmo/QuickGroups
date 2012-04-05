@@ -12,26 +12,30 @@ function reloadGroupData(completion_callback, callback_args) {
 		// clear the dictionary first
 		group_objects_by_id = {};
 
-		$.each(data, function(index, group_as_dict) {
-			var g = new Group(group_as_dict["label"]);
-			g.id = group_as_dict["id"];
-			g.is_self_serve = group_as_dict["is_self_serve"];
-			g.is_public = group_as_dict["is_public"];
-			g.mine = group_as_dict["mine"];
+		if (data.success) {
+			$.each(data.groups, function(index, group_as_dict) {
+				var g = new Group(group_as_dict["label"]);
+				g.id = group_as_dict["id"];
+				g.is_self_serve = group_as_dict["is_self_serve"];
+				g.is_public = group_as_dict["is_public"];
+				g.mine = group_as_dict["mine"];
 
-			var members_as_dicts = group_as_dict["members_as_dicts"];
-			$.each(members_as_dicts, function(alias, member_as_dict) {
+				var members_as_dicts = group_as_dict["members_as_dicts"];
+				$.each(members_as_dicts, function(alias, member_as_dict) {
 
-				var m = new GroupMember(alias);
-				m.set_by = member_as_dict["set_by"];
-				m.modified = member_as_dict["modified"];
-				g.member_objects_by_alias[alias] = m;
+					var m = new GroupMember(alias);
+					m.set_by = member_as_dict["set_by"];
+					m.modified = member_as_dict["modified"];
+					g.member_objects_by_alias[alias] = m;
+				});
+
+				group_objects_by_id[g.id] = g;
 			});
 
-			group_objects_by_id[g.id] = g;
-		});
-
-		fetchUnknownNames(completion_callback, callback_args);
+			fetchUnknownNames(completion_callback, callback_args);
+		} else {
+			alert(data.error);
+		}
 	});
 }
 

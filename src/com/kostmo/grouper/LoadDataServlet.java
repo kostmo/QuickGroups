@@ -31,6 +31,7 @@ public class LoadDataServlet extends HttpServlet {
 
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void doGet(HttpServletRequest request,
 		HttpServletResponse response) throws ServletException, IOException {
@@ -40,7 +41,10 @@ public class LoadDataServlet extends HttpServlet {
 		String action = request.getParameter("action");
 		
 
-		JSONArray json_output_object = new JSONArray();
+		JSONObject json_output_object = new JSONObject();
+		json_output_object.put("success", false);
+		
+		JSONArray json_group_array = new JSONArray();
 		
 		// TODO
 		if ("exportAll".equals(action)) {
@@ -52,17 +56,17 @@ public class LoadDataServlet extends HttpServlet {
 			if ("xml".equals(format)) {
 
 				
-				json_output_object.add(1);
+				json_group_array.add(1);
 				
 				
 			} else if ("json".equals(format)) {
 
 				
-				json_output_object.add(2);
+				json_group_array.add(2);
 			} else if ("csv".equals(format)) {
 
 				
-				json_output_object.add(3);
+				json_group_array.add(3);
 			}
 			
 		} else {
@@ -80,23 +84,27 @@ public class LoadDataServlet extends HttpServlet {
 					
 					JSONObject jo = g.asJsonObject();
 					jo.put("mine", g.owner.equals(request.getRemoteUser()));
-					json_output_object.add(jo);
+					json_group_array.add(jo);
 				}
+				
+
+				json_output_object.put("success", true);
 				
 			} catch (SQLException e) {
 				e.printStackTrace();
+				json_output_object.put("error", e.getMessage());
 			} catch (MisconfigurationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
+				json_output_object.put("error", e.getMessage());
 			}
 		}
+
+		json_output_object.put("groups", json_group_array);
 
 		StringWriter json_out = new StringWriter();
 		json_output_object.writeJSONString(json_out);
 
 		response.setContentType("text/json");
-		
-		
 		
 		PrintWriter out = response.getWriter();
 		out.append( json_out.toString() );

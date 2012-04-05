@@ -16,9 +16,8 @@
 <link rel='stylesheet' type='text/css' href='style/grouper.css' />
 
 <script type="text/javascript">
-var logged_in_username = "<%=request.getRemoteUser()%>
-	";
-	var company_domain = "example.com"; // FIXME
+var logged_in_username = "<%=request.getRemoteUser()%>";
+var company_domain = "example.com"; // FIXME
 </script>
 
 </head>
