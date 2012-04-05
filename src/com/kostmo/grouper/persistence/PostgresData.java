@@ -19,7 +19,7 @@ import com.kostmo.grouper.LdapHelper.MisconfigurationException;
 
 public class PostgresData {
 
-	public static Connection getPostgresConnection(HttpServlet servlet) throws SQLException, MisconfigurationException {
+	public static Connection getPostgresConnection(HttpServlet servlet) throws SQLException, MisconfigurationException, ClassNotFoundException {
 
 		String location = "/WEB-INF/postgresql.properties";
 		Properties postgres_properties = new Properties();
@@ -29,6 +29,8 @@ public class PostgresData {
 			throw new MisconfigurationException( String.format("You need to create the file \"%s\"", location) );
 		}
 
+		
+		Class.forName("org.postgresql.Driver");
 		return DriverManager.getConnection(postgres_properties.getProperty("jdbc_url"), postgres_properties);
 	}
 

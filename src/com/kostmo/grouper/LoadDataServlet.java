@@ -96,6 +96,9 @@ public class LoadDataServlet extends HttpServlet {
 			} catch (MisconfigurationException e) {
 				e.printStackTrace();
 				json_output_object.put("error", e.getMessage());
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+				json_output_object.put("error", e.getMessage());
 			}
 		}
 
