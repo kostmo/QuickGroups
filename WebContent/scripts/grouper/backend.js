@@ -74,22 +74,18 @@ function addMember(alias, full_name) {
 	if ( !(alias in active_group.member_objects_by_alias) ) {
 		fullname_cache[alias] = full_name;
 		active_group.member_objects_by_alias[alias] = new GroupMember(alias);
+		active_group.markDirty();
 	}
-	
-	active_group.markDirty();
 }
 
 //============================================================================
 function removeMember( alias ) {
 
-	console.log("will remove: " + alias );
 	var active_group = getActiveGroup();
-
 	if (alias in active_group.member_objects_by_alias) {
 		delete active_group.member_objects_by_alias[alias];
+		active_group.markDirty();
 	}
-
-	active_group.markDirty();
 }
 
 //============================================================================
@@ -148,39 +144,32 @@ function saveGroup() {
 	new_group.label = group_label;
 	new_group.is_self_serve = $('#is_self_serve').is(':checked');
 	new_group.is_public = $('#is_public').is(':checked');
-
-	console.log("Saving group with label: " + group_label );
 	
 	// TODO We could check for all dirty groups and implement a "Save All" command
 	var groups = {};
 	groups[new_group.label] = new_group.asDictionary();
 	
 	var action_type = new_group.id < 0 ? "insert" : "modify";
-	console.log("About to save group with this action: " + action_type + "; Group ID: " + new_group.id);
-	
 	var jsonString = JSON.stringify(groups);
 	$.post("save", {
 			action: action_type,
 			json: jsonString,
 		},
 		function(data) {
-			
-			var group = getActiveGroup();
 		
-			group.dirty = false;
+			new_group.dirty = false;
 			
 			if (data.created_new_group) {
 				
-				var old_group_id = group.id;
-				group.id = data.new_group_id;
-				group_objects_by_id[group.id] = group;
+				var old_group_id = new_group.id;
+				new_group.id = data.new_group_id;
+				group_objects_by_id[new_group.id] = new_group;
+				new_group.mine = true;
 				delete group_objects_by_id[old_group_id];	
 			}
 
 			renderGroups();
-			showGroup(group.id);
-
-			console.log("Count: " + data.count + "\nSuccess: " + data.success);
+			showGroup(new_group.id);
 		}
 	);
 }

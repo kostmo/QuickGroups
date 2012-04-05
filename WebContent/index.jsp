@@ -95,7 +95,6 @@ var company_domain = "example.com"; // FIXME
 					</td>
 					<td style="vertical-align: top; padding-left: 20px">
 
-						<form>
 							<fieldset>
 								<legend>Group properties</legend>
 
@@ -134,7 +133,6 @@ var company_domain = "example.com"; // FIXME
 
 								<a id="group_email_url" href="mailto:">Send email to group</a>
 							</fieldset>
-						</form>
 
 					</td>
 				</tr>

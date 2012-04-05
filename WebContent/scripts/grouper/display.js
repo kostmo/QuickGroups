@@ -19,17 +19,18 @@ $(function() {
 		select: function(event, ui) {
 			var alias = ui.item.value;
 			var full_name = ui.item.label;
-			console.log("Selected item: " + alias);
+//			console.log("Selected item: " + alias);
 			addMember(alias, full_name);
 		},
 		change: function(event, ui) {
 			if (ui.item != null) {
 				var alias = ui.item.value;
 				var full_name = ui.item.label;
-				console.log("Changed item: " + alias);
+//				console.log("Changed item: " + alias);
 				addMember(alias, full_name);
-			} else
-				console.log("Changed item, but it was null.");
+			} else {
+//				console.log("Changed item, but it was null.");
+			}
 		},
 		search: function(event, ui) {
 			$( "#hourglass_img" ).show();
@@ -197,6 +198,7 @@ function showGroup(group_id) {
 		else
 			$( "#save_button" ).attr("disabled", "disabled");
 
+
 	} else
 		$(".modifying_actions").attr("disabled", "disabled");
 	
@@ -255,7 +257,7 @@ function copyGroup(group_id) {
 			label: new_group_label,
 		},
 		function(data) {
-			console.log("Success: " + data.success + "; New group id: " + data.new_group_id);
+//			console.log("Success: " + data.success + "; New group id: " + data.new_group_id);
 			
 			if (data.success) {
 				
