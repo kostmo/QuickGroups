@@ -13,8 +13,6 @@ import java.util.Properties;
 
 import javax.servlet.http.HttpServlet;
 
-import org.json.simple.JSONObject;
-
 import com.kostmo.grouper.LdapHelper.MisconfigurationException;
 
 public class PostgresData {

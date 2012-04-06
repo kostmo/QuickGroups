@@ -1,2 +1,2 @@
-* Full Name/Alias radio selector not working
-* Show/hide "Bulk actions:", rename as "Advanced..."
+* Add tags for grouping groups
+* Display groups grouped by owner
