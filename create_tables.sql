@@ -4,10 +4,11 @@ CREATE TABLE groups
   label character(255),
   is_public boolean,
   is_self_serve boolean,
-  "owner" character(30),
+  "owner" character(30) NOT NULL,
   created timestamp without time zone,
   modified timestamp without time zone,
-  CONSTRAINT groups_pkey PRIMARY KEY (id)
+  CONSTRAINT groups_pkey PRIMARY KEY (id),
+  CONSTRAINT groups_label_key UNIQUE (label, owner)
 );
 
 CREATE TABLE membership
@@ -78,4 +79,4 @@ CREATE OR REPLACE VIEW "ViewGroupsWithAggregateInfo" AS
  SELECT groups.id, groups.label, groups.is_public, groups.is_self_serve, groups.owner, groups.created, groups.modified, "ViewMembershipAggregates".oldest, "ViewMembershipAggregates".newest, COALESCE("ViewMembershipAggregates".member_count, 0::bigint) AS member_count, "ViewTagLists".taglist, "ViewTagLists".tag_count
    FROM groups
    LEFT JOIN "ViewMembershipAggregates" ON "ViewMembershipAggregates".id = groups.id
-   JOIN "ViewTagLists" ON "ViewTagLists".group_id = groups.id;
+   LEFT JOIN "ViewTagLists" ON "ViewTagLists".group_id = groups.id;

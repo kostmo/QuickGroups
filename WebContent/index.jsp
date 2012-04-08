@@ -51,8 +51,7 @@ var company_domain = "example.com"; // FIXME
 				<ul id="group_list"></ul>
 
 			</div>
-			<button onclick="toggle_advanced_bulk_options(this)">Show
-				Advanced &gt;&gt;</button>
+			<button onclick="toggle_advanced_bulk_options(this)">Show Advanced &gt;&gt;</button>
 
 			<fieldset id="advanced_bulk_options" style="display: none">
 				<legend>Exporting</legend>
@@ -91,6 +90,9 @@ var company_domain = "example.com"; // FIXME
 							name="search_by_radio_group" value="alias" checked="checked" />Alias</label>
 						<label><input type="radio"
 							name="search_by_radio_group" value="name" />Full Name</label>
+							
+						<p><button class="modifying_actions"
+									onclick='bulkMemberAdd();'>Bulk Member Add</button></p>
 						<h4>Current members:</h4>
 						<div id="current_members_box">
 						<span id="member_count">0
@@ -130,12 +132,32 @@ var company_domain = "example.com"; // FIXME
 						</fieldset>
 
 							<fieldset>
+								<legend>Group maintainer</legend>
+								Select new maintainer:
+								<div class='ui-widget'>
+									<label for='maintainer_field'></label><input
+										class="modifying_actions" id='maintainer_field' /> <img
+										style='display: none; vertical-align: middle;'
+										id='maintainer_hourglass_img' src='images/square-ajax-loader.gif' />
+									<button class="modifying_actions"
+									onclick='transferOwnership($("#maintainer_field").val());'>Transfer ownership</button>
+								</div>
+								
+							</fieldset>
+
+							<fieldset>
 								<legend>Group manipulation</legend>
 								<button class="modifying_actions"
 									onclick='saveGroup(active_group_id);' id="save_button">Save</button>
 								<button onclick='copyGroup(active_group_id);'>Copy</button>
 								<button class="modifying_actions"
 									onclick='deleteGroup(active_group_id);'>Delete</button>
+
+								<button class="modifying_actions" onclick="toggle_merge_options()">Merge &gt;&gt;</button>
+								<div id="merge_options" style="display: none">
+									From group: 
+								</div>
+								
 							</fieldset>
 
 							<fieldset>

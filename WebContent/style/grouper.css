@@ -30,6 +30,11 @@ button.dirty_save_button {
     color: white;
 }
 
+button.dirty_save_button:active {
+    background-color: rgb(255,150,150);
+    color: black;
+}
+
 #current_members_box {
 	border: 5px solid rgb(255,255,150);
 	border-radius: 5px;
@@ -46,7 +51,6 @@ button.dirty_save_button {
 }
 
 #group_list li {
-	font-weight: bold;
 	background-color: rgb(200,200,255);
 	margin-top: .3em;
 	margin-bottom: .3em;
@@ -70,12 +74,12 @@ button.dirty_save_button {
 }
 
 #left {
-    width: 225px;
+    width: 275px;
     float: left;
 }
 
 #right {
-    margin-left:250px; /* Change this to whatever the width of your left column is*/
+    margin-left: 300px; /* Change this to whatever the width of your left column is*/
 }
 
 .clear {

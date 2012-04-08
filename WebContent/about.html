@@ -5,31 +5,70 @@
 </head>
 <body>
 
-<h1>About Quick Groups</h1>
-<p>A self-service <a href="http://en.wikipedia.org/wiki/Create,_read,_update_and_delete">CRUD</a> interface for grouping <a href="http://en.wikipedia.org/wiki/ActiveDirectory">ActiveDirectory</a> names.</p>
+	<h1>About Quick Groups</h1>
+	<p>
+		A self-service <a
+			href="http://en.wikipedia.org/wiki/Create,_read,_update_and_delete">CRUD</a>
+		interface for grouping <a
+			href="http://en.wikipedia.org/wiki/ActiveDirectory">ActiveDirectory</a>
+		names.
+	</p>
 
-<h2>Motivation</h2>
+	<h2>Use cases</h2>
+	<ul>
+		<li>Finding the right people to include on a new e-mail thread</li>
+		<li>Dynamic groups for which the utility would be reduced by slow AD admin response times</li>
+	</ul>
 
-<ul>
-<li>Group creation does not require AD administrator approval</li>
-<li>Avoids AD administrator turnaround time</li>
-<li>Lighter-weight and less "official" than actual AD groups</li>
-<li>Could be used for "drafting" true AD groups
-<ul><li>Add a feature to "submit draft" to AD administrator to apply to the authoritative AD?</li></ul>
-</li>
-<li>Query-able without requiring AD credentials</li>
-</ul>
+	<h2>Motivation</h2>
+	<ul>
+		<li>Group creation does not require AD administrator approval</li>
+		<li>Could be used for "drafting" true AD groups
+			<ul>
+				<li>Add a feature to "submit draft" to AD administrator to
+					apply to the authoritative AD?</li>
+			</ul>
+		</li>
+		<li>Query-able without requiring AD credentials</li>
+	</ul>
 
-<h2>Features</h2>
-<ul>
-<li>Should be able to whitelist who can edit a particular group</li>
-</ul>
+	<h2>Design Goals</h2>
+	<ul>
+		<li>Distributed-maintenance</li>
+		<li>Avoids AD administrator turnaround time</li>
+		<li>Lighter-weight and less "official" than actual AD groups</li>
+	</ul>
 
-<h2>TODO</h2>
-<ul>
-<li>May also be useful in Jira plugins for automatic field population logic</li>
-</ul>
-Written by Karl Ostmo<br/>
-<a href="https://github.com/kostmo/QuickGroups">Source code</a>
+
+	<h2>Design rationale</h2>
+	<p>I wanted to be able to infer new groups from existing groups.
+		There are two opposing approaches for this:
+	<ul>
+		<li>Make specific groups the basic unit, infer larger groups
+			through union operations</li>
+		<li>Make general categories (i.e. "tags") the basic unit, infer
+			more specific groups through intersection operations</li>
+	</ul>
+	I've chosen the former approach.
+	</p>
+
+	<h2>Limits of Scope</h2>
+	<p>This project shall not become standalone "announcement list" or
+		"discussion list" software, with the ability to send and store
+		messages. Rather, it shall only be a method of obtaining lists of
+		people for which to communicate by other means.</p>
+	<h2>Features</h2>
+	<ul>
+		<li>Should be able to whitelist who can edit a particular group</li>
+	</ul>
+
+	<h2>TODO</h2>
+	<ul>
+		<li>May also be useful in Jira plugins for automatic field
+			population logic</li>
+	</ul>
+	Written by Karl Ostmo
+	<br />
+	<a href="https://github.com/kostmo/QuickGroups">Source code</a>
 </body>
 </html>

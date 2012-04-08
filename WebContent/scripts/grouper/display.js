@@ -42,6 +42,25 @@ $(function() {
 			}
 		},
 	});
+
+	$( "#maintainer_field" ).autocomplete({
+		source: function(request, response) {
+			$( "#maintainer_hourglass_img" ).show();
+			$.getJSON("search", {
+				term: request.term,
+				field: "alias"},
+				function(data) {
+					$( "#maintainer_hourglass_img" ).hide();
+					response(data);
+			});
+		},
+		autoFocus: true,
+//		select: function(event, ui) {
+//			var alias = ui.item.value;
+//			transferOwnership(alias);
+//		},
+	});
+
 	
 	$( "#tag_input" ).autocomplete({
 		source: function(request, response) {
@@ -114,6 +133,15 @@ function toggle_advanced_bulk_options(link_element) {
 }
 
 //============================================================================
+function toggle_merge_options(link_element) {
+	
+	var bulk_options_section = $("#merge_options");
+	bulk_options_section.toggle();
+	var is_visible = bulk_options_section.is(":visible");
+	$(link_element).text( (is_visible ? "Hide Merge options <<": "Merge >>") );
+}
+
+//============================================================================
 function renderGroups() {
 
 	var sorted_dictionary_keys = getSortedDictionaryKeys(group_objects_by_id, function(dict, key) {
@@ -124,8 +152,7 @@ function renderGroups() {
 	var li_elements = [];
 	$.each(sorted_dictionary_keys, function(key_index, key_value) {
 		var group_object = group_objects_by_id[key_value];
-		var group_id = group_object.id;
-		li_elements.push( "<li onclick='showGroup(" + group_id + ")'>" + group_object.label + "</li>" );
+		li_elements.push( "<li onclick='showGroup(" + group_object.id + ")'>" + group_object.label + " (" + group_object.getMemberCount() + ")</li>" );
 		group_count++;
 	});
 

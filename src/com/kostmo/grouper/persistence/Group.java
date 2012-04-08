@@ -71,7 +71,9 @@ public class Group implements JsonSerializable {
 				rs.getBoolean("is_self_serve"),
 				rs.getString("owner").trim()
 			);
-		g.tags.addAll(Arrays.asList(rs.getString("taglist").split(",")));
+		String taglist_string = rs.getString("taglist");
+		if (taglist_string != null)
+			g.tags.addAll(Arrays.asList(taglist_string.split(",")));
 		return g;
 	}
 

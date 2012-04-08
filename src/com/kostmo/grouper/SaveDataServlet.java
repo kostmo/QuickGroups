@@ -47,6 +47,8 @@ public class SaveDataServlet extends HttpServlet {
 			result_object = deleteAction(request);
 		} else if ("modify".equals(action_type)) {
 			result_object = modifyAction(request);
+		} else if ("bequeath".equals(action_type)) {
+			result_object = bequeathAction(request);
 		} else {
 			result_object = new JSONObject();
 			result_object.put("success", false);
@@ -97,6 +99,37 @@ public class SaveDataServlet extends HttpServlet {
 
 	// ========================================================================
 	@SuppressWarnings("unchecked")
+	private JSONObject bequeathAction(HttpServletRequest request) {
+
+		String group_id_string = request.getParameter("group_id");
+		long group_id = Long.parseLong(group_id_string);
+		
+		String new_owner = request.getParameter("new_owner");
+
+		JSONObject json_output_object = new JSONObject();
+		try {
+			Connection postgres_connection = PostgresData.getPostgresConnection(this);
+			PostgresData.bequeathGroup(postgres_connection, group_id, request.getRemoteUser(), new_owner);
+
+			json_output_object.put("success", true);
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MisconfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return json_output_object;
+	}
+	
+	
+	// ========================================================================
+	@SuppressWarnings("unchecked")
 	private JSONObject deleteAction(HttpServletRequest request) {
 
 
@@ -107,7 +140,7 @@ public class SaveDataServlet extends HttpServlet {
 		JSONObject json_output_object = new JSONObject();
 		try {
 			Connection postgres_connection = PostgresData.getPostgresConnection(this);
-			PostgresData.deleteGroup(postgres_connection, group_id);
+			PostgresData.deleteGroup(postgres_connection, group_id, request.getRemoteUser());
 
 			json_output_object.put("success", true);
 			

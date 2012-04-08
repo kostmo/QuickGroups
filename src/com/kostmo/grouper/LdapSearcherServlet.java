@@ -19,7 +19,7 @@ import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;
 
 @WebServlet("/search")
-public class SearcherServlet extends HttpServlet {
+public class LdapSearcherServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	@Override
