@@ -3,6 +3,7 @@ function Group(label) {
 	this.id = -1;	// -1 indicates a group that has not been persisted to the database, yet.
 	this.dirty = false;
 	this.member_objects_by_alias = {};
+	this.tags = [];
 	this.mine = true;
 	
 	
@@ -35,6 +36,7 @@ function Group(label) {
 				"is_self_serve": this.is_self_serve,
 				"is_public": this.is_public,
 				"id": this.id,
+				"tags": this.tags,
 				"members_as_dicts": members_as_dicts,
 		};
 		return dict;

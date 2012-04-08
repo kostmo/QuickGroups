@@ -12,10 +12,19 @@ $(function() {
 	var first_radio_element = $('input[name="export_radio_group"]')[0];
 	$(first_radio_element).attr('checked', true);
 	first_radio_element.onchange();
-	
-	var search_field = $('input:radio[name=search_by_radio_group]:checked').val();
+
 	$( "#namefield" ).autocomplete({
-		source: "search?field=" + search_field,
+		source: function(request, response) {
+			$( "#hourglass_img" ).show();
+			$.getJSON("search", {
+				term: request.term,
+				field: $('input:radio[name=search_by_radio_group]:checked').val()},
+				function(data) {
+					$( "#hourglass_img" ).hide();
+					response(data);
+			});
+		},
+		autoFocus: true,
 		select: function(event, ui) {
 			var alias = ui.item.value;
 			var full_name = ui.item.label;
@@ -32,13 +41,41 @@ $(function() {
 //				console.log("Changed item, but it was null.");
 			}
 		},
-		search: function(event, ui) {
-			$( "#hourglass_img" ).show();
-		},
-		open: function(event, ui) {
-			$( "#hourglass_img" ).hide();
-		}
 	});
+	
+	$( "#tag_input" ).autocomplete({
+		source: function(request, response) {
+			$( "#tag_hourglass_img" ).show();
+			$.getJSON("tags", {
+				term: request.term
+			},
+				function(data) {
+					$( "#tag_hourglass_img" ).hide();
+					response(data);
+			});
+		},
+		autoFocus: true,
+		select: function(event, ui) {
+			var tag = ui.item.value;
+			addTag(tag);
+		},
+		change: function(event, ui) {
+			if (ui.item != null) {
+				var tag = ui.item.value;
+				addTag(tag);
+			} else {
+//				console.log("Changed item, but it was null.");
+			}
+		},
+	});
+	
+	
+	$( "#tag_input" ).keyup(function(event){
+	    if(event.keyCode == 13){
+			addTag( $( this ).val() );
+	    }
+	});
+	
 	
 	$("#group_label").mouseup(function(e){
         e.preventDefault();
@@ -74,12 +111,6 @@ function toggle_advanced_bulk_options(link_element) {
 	bulk_options_section.toggle();
 	var is_visible = bulk_options_section.is(":visible");
 	$(link_element).text( (is_visible ? "Hide Advanced <<": "Show Advanced >>") );
-}
-
-//============================================================================
-function changeAutocompleteSource(radio_button) {
-	var radio_button_value = $(radio_button).val();
-	$( "#namefield" ).autocomplete( "option", "source", "search?field=" + radio_button_value );
 }
 
 //============================================================================
@@ -132,8 +163,6 @@ function changeExportType(radio_button) {
 	$( "#query_url" ).text( radio_button_value + " query link");
 }
 
-
-
 //============================================================================
 function changePublicVisibility(checkbox_element) {
 
@@ -182,6 +211,9 @@ function showGroup(group_id) {
 	$( "#is_self_serve" ).attr('checked', group_object.is_self_serve);
 
 
+	// Render tag list
+	$( "#tags_list" ).html(group_object.tags.map(renderTagItem).join(", "));
+	
 	if (group_object.mine || group_object.is_self_serve) {
 		
 		$(".modifying_actions").removeAttr('disabled');
@@ -193,10 +225,13 @@ function showGroup(group_id) {
 			$( "#is_self_serve" ).attr("disabled", "disabled");
 		}
 		
-		if (group_object.dirty)
+		if (group_object.dirty) {
 			$( "#save_button" ).removeAttr('disabled');
-		else
+			$( "#save_button" ).addClass( "dirty_save_button" );
+		} else {
 			$( "#save_button" ).attr("disabled", "disabled");
+			$( "#save_button" ).removeClass( "dirty_save_button" );
+		}
 
 
 	} else
@@ -226,6 +261,17 @@ function showGroup(group_id) {
 }
 
 //============================================================================
+function renderTagItem(tag) {
+	var remove_command = "";
+
+	var group = getActiveGroup();
+	if (group.mine)
+		remove_command = " <span class='remove_member' onclick='removeTag(\"" + tag + "\");'>[<img style='vertical-align: middle' src='images/tiny_trashcan.png' title='Remove' alt='trash can'>]</span>";
+
+	return "<span style=''>" + tag + "</span>" + remove_command;
+}
+
+//============================================================================
 function renderMemberItem(group, alias) {
 	var remove_command = "";
 	
@@ -235,11 +281,11 @@ function renderMemberItem(group, alias) {
 		command_text = "Remove myself";
 	
 	if (group.mine || (group.is_self_serve && is_me)) {
-		remove_command = " <span style='color: #800000' onclick='removeMember(\"" + alias + "\");'>[" + command_text + "]</span>";
+		remove_command = " <span class='remove_member' onclick='removeMember(\"" + alias + "\");'>[<img style='vertical-align: middle' src='images/tiny_trashcan.png' title='" + command_text + "' alt='trash can'>]</span>";
 	}
 	
 	var full_name = fullname_cache[alias];
-	return "<li><span style='color: #000080'>" + full_name + "</span> (<span style='color: #008000'>" + alias + "</span>)" + remove_command +"</li>";
+	return "<li><span style='font-weight: bold'>" + full_name + "</span> (<span style='color: #008000'>" + alias + "</span>)" + remove_command +"</li>";
 }
 
 //============================================================================

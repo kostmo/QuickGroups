@@ -37,7 +37,6 @@ public class SaveDataServlet extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 
 		String action_type = request.getParameter("action");
-		System.out.println("Serverside, will perform this action: " + action_type);
 		
 		JSONObject result_object = null;
 		if ("insert".equals(action_type)) {
@@ -49,6 +48,7 @@ public class SaveDataServlet extends HttpServlet {
 		} else if ("modify".equals(action_type)) {
 			result_object = modifyAction(request);
 		} else {
+			result_object = new JSONObject();
 			result_object.put("success", false);
 			result_object.put("message", "Invalid action.");
 		}
@@ -56,11 +56,9 @@ public class SaveDataServlet extends HttpServlet {
 		StringWriter json_out = new StringWriter();
 		result_object.writeJSONString(json_out);
 
-
 		response.setContentType("text/json");
 		PrintWriter out = response.getWriter();
 		out.append( json_out.toString() );
-		
 	}
 
 	// ========================================================================

@@ -39,6 +39,8 @@ var company_domain = "example.com"; // FIXME
 
 			<div id="outer_grouplist_container">
 
+				Show groups with tags:
+				<div id="group_filter_taglist"></div>
 
 				<h3>
 					<span id="group_list_header">Loading...</span> <img
@@ -76,21 +78,24 @@ var company_domain = "example.com"; // FIXME
 			<table id="group_info_display" style="display: none">
 				<tr>
 					<td style="vertical-align: top">
-						<h3>Group membership:</h3> Search by:<br /> <label><input
-							type="radio" onchange="changeAutocompleteSource(this);"
-							name="search_by_radio_group" value="alias" checked="checked" />Alias</label><br />
-						<label><input type="radio"
-							onchange="changeAutocompleteSource(this);"
-							name="search_by_radio_group" value="name" />Full Name</label><br />
+						<h3>Group membership:</h3>
 						<div class='ui-widget'>
 							<label for='namefield'>Add Member: </label><input
 								class="modifying_actions" id='namefield' /> <img
 								style='display: none; vertical-align: middle;'
 								id='hourglass_img' src='images/square-ajax-loader.gif' />
 						</div>
-						<h4>Current members:</h4> <span id="member_count">0
+
+						 Search by: <label><input
+							type="radio"
+							name="search_by_radio_group" value="alias" checked="checked" />Alias</label>
+						<label><input type="radio"
+							name="search_by_radio_group" value="name" />Full Name</label>
+						<h4>Current members:</h4>
+						<div id="current_members_box">
+						<span id="member_count">0
 							member(s).</span>
-						<ul id='group_holder'></ul>
+						<ul id='group_holder'></ul></div>
 
 					</td>
 					<td style="vertical-align: top; padding-left: 20px">
@@ -114,7 +119,15 @@ var company_domain = "example.com"; // FIXME
 												membership</label></td>
 									</tr>
 								</table>
-							</fieldset>
+								<h4>Tags:</h4>
+							<div id="tags_list"></div>
+							<div class='ui-widget'>
+								<label for='tag_input'>Add Tag: </label><input
+									class="modifying_actions" id='tag_input' /> <img
+									style='display: none; vertical-align: middle;'
+									id='tag_hourglass_img' src='images/square-ajax-loader.gif' />
+							</div>
+						</fieldset>
 
 							<fieldset>
 								<legend>Group manipulation</legend>
@@ -137,10 +150,7 @@ var company_domain = "example.com"; // FIXME
 					</td>
 				</tr>
 			</table>
-
-
 		</div>
-
 	</div>
 	<hr class="clear" />
 	<a href="about.html">About</a>

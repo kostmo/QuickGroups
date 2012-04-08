@@ -2,12 +2,14 @@ package com.kostmo.grouper.persistence;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 
@@ -18,6 +20,7 @@ public class Group implements JsonSerializable {
 	public final String owner;
 	public Date created, modified;
 	public final Set<GroupMember> group_members = new HashSet<GroupMember>();
+	public final Set<String> tags = new HashSet<String>();
 
 	public Group(long id, String label, boolean is_public, boolean is_self_serve, String owner) {
 		this.id = id;
@@ -27,6 +30,7 @@ public class Group implements JsonSerializable {
 		this.owner = owner;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static Group newFromJSON(JSONObject json_object, String owner_alias) throws SQLException {
 
 		Group g = new Group(
@@ -35,7 +39,10 @@ public class Group implements JsonSerializable {
 				(Boolean) json_object.get("is_public"),
 				(Boolean) json_object.get("is_self_serve"),
 				owner_alias
-				);
+			);
+
+		JSONArray tags = (JSONArray) json_object.get("tags");
+		g.tags.addAll(tags);
 		
 		JSONObject members_as_dicts = (JSONObject) json_object.get("members_as_dicts");
 		for (Object item_key : members_as_dicts.keySet()) {
@@ -57,13 +64,15 @@ public class Group implements JsonSerializable {
 	}
 	
 	public static Group newFromResultSet(ResultSet rs) throws SQLException {
-		return new Group(
+		Group g = new Group(
 				rs.getLong("id"),
 				rs.getString("label").trim(),
 				rs.getBoolean("is_public"),
 				rs.getBoolean("is_self_serve"),
 				rs.getString("owner").trim()
-				);
+			);
+		g.tags.addAll(Arrays.asList(rs.getString("taglist").split(",")));
+		return g;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -75,6 +84,10 @@ public class Group implements JsonSerializable {
 		json_output_object.put("is_public", is_public);
 		json_output_object.put("is_self_serve", is_self_serve);
 		json_output_object.put("owner", owner);
+		
+		JSONArray tags_array = new JSONArray();
+		tags_array.addAll(tags);
+		json_output_object.put("tags", tags_array);
 		
 		JSONObject members_as_dicts = new JSONObject();
 		for (GroupMember member : this.group_members)

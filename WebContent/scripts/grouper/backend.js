@@ -18,6 +18,7 @@ function reloadGroupData(completion_callback, callback_args) {
 				g.id = group_as_dict["id"];
 				g.is_self_serve = group_as_dict["is_self_serve"];
 				g.is_public = group_as_dict["is_public"];
+				g.tags = group_as_dict["tags"];
 				g.mine = group_as_dict["mine"];
 
 				var members_as_dicts = group_as_dict["members_as_dicts"];
@@ -70,7 +71,6 @@ function fetchUnknownNames(completion_callback, callback_args) {
 function addMember(alias, full_name) {
 	
 	var active_group = getActiveGroup();
-	
 	if ( !(alias in active_group.member_objects_by_alias) ) {
 		fullname_cache[alias] = full_name;
 		active_group.member_objects_by_alias[alias] = new GroupMember(alias);
@@ -84,6 +84,28 @@ function removeMember( alias ) {
 	var active_group = getActiveGroup();
 	if (alias in active_group.member_objects_by_alias) {
 		delete active_group.member_objects_by_alias[alias];
+		active_group.markDirty();
+	}
+}
+
+//============================================================================
+function addTag(tag) {
+	
+	var active_group = getActiveGroup();
+	var idx = active_group.tags.indexOf(tag); // Find the index
+	if (idx < 0) {
+		active_group.tags.push(tag);
+		active_group.markDirty();
+	}
+}
+
+//============================================================================
+function removeTag( tag ) {
+
+	var active_group = getActiveGroup();
+	var idx = active_group.tags.indexOf(tag); // Find the index
+	if (idx >= 0) {
+		active_group.tags.splice(idx, 1);
 		active_group.markDirty();
 	}
 }

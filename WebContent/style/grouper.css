@@ -1,3 +1,7 @@
+fieldset {
+	margin-bottom: 0.5em;
+}
+
 .login-info {
 	float: right;
 }
@@ -11,12 +15,34 @@
 	display: block;
 }
 
+.remove_member {
+	color: #800000;
+}
+
+.remove_member:hover {
+	background-color: white;
+	cursor: hand;
+}
+
+button.dirty_save_button {
+	border: 3px solid rgb(150,60,60);
+    background-color: rgb(180,80,80);
+    color: white;
+}
+
+#current_members_box {
+	border: 5px solid rgb(255,255,150);
+	border-radius: 5px;
+    background-color: rgb(255,255,220);
+	padding: 0.3em;
+}
+
 #group_list {
 	border-radius: 5px;
     background-color: rgb(120,120,255);
 	list-style-type: none;
-	margin: 0.5em; 
-	padding: 0.5em; 
+	margin: 0.5em;
+	padding: 0.5em;
 }
 
 #group_list li {
@@ -36,12 +62,6 @@
 	background-color: rgb(255,160,160);
 }
 
-
-#left {
-    width: 175px;
-    float: left;
-}
-
 #outer_grouplist_container {
 	padding: 0.5em; 
 	margin: 0.4 em;
@@ -49,9 +69,13 @@
     background-color: rgb(240,240,255);
 }
 
+#left {
+    width: 225px;
+    float: left;
+}
 
 #right {
-    margin-left:200px; /* Change this to whatever the width of your left column is*/
+    margin-left:250px; /* Change this to whatever the width of your left column is*/
 }
 
 .clear {

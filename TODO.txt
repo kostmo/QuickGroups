@@ -1,2 +1,3 @@
 * Add tags for grouping groups
 * Display groups grouped by owner
+* Wrap save operations in database transaction
