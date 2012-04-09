@@ -38,13 +38,22 @@ var company_domain = "example.com"; // FIXME
 			<td style="min-width: 250px">Show groups with tags:
 
 				<div id="filter_tags_list"></div>
+				
+				<label><input
+							onchange="changeTagFilterCriteria(this);" type="radio"
+							name="tag_filter_radio_group" value="any" checked="checked"/>Any</label>
+				<label><input
+							onchange="changeTagFilterCriteria(this);" type="radio"
+							name="tag_filter_radio_group" value="all" />All</label>
+							
+							
 				<div class='ui-widget'>
 					<label for='filter_tag_input'>Add tag filter: </label><input
 						id='filter_tag_input' /> <img
 						style='display: none; vertical-align: middle;'
 						id='filter_hourglass_img' src='images/square-ajax-loader.gif' />
-				</div> <br />
-				<button onclick='newGroup();'>New group</button> <br />
+				</div><br />
+				
 				<button onclick="toggle_advanced_bulk_options(this)">Show
 					Advanced &gt;&gt;</button>
 
@@ -63,17 +72,20 @@ var company_domain = "example.com"; // FIXME
 					</p>
 					<a id="query_url" href="blah">Machine query link</a>
 				</fieldset>
+				<br/>
+				<button onclick="toggleAggregateMemberList(this)">See members of visible groups</button>
+				<div id="aggregate_member_list" style="max-width: 300px; display: none;"></div>
 			</td>
 			<td style="min-width: 250px">
 
 				<div id="outer_grouplist_container">
-
 
 					<h3>
 						<span id="group_list_header">Loading...</span> <img
 							style='display: none; vertical-align: middle;'
 							id='group_load_hourglass_img' src='images/square-ajax-loader.gif' />
 					</h3>
+					<button onclick='newGroup();'>New group</button>
 					<ul id="group_list"></ul>
 
 				</div>

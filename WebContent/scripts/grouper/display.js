@@ -138,27 +138,51 @@ function toggle_merge_options(link_element) {
 }
 
 //============================================================================
+function toggleAggregateMemberList() {
+	$("#aggregate_member_list").toggle();
+}
+
+//============================================================================
 function renderGroups() {
 
 	var sorted_dictionary_keys = getSortedDictionaryKeys(group_objects_by_id, function(dict, key) {
 		return dict[key].label.toLowerCase();
 	});
-
+	
+	var filter_criteria_value = $('input:radio[name=tag_filter_radio_group]:checked').val();
+	
+	var shown_groups_aliases = {};
 	var group_count = 0;
 	var li_elements = [];
 	$.each(sorted_dictionary_keys, function(key_index, key_value) {
 
 		var group_object = group_objects_by_id[key_value];
 		
+		var filter_function = filter_criteria_value == "all" ? Array.prototype.every : Array.prototype.some;
 		if (filter_tags.length > 0)
-			if (!filter_tags.some(function(tag) {return group_object.tags.indexOf(tag) >= 0;}))
+			if (!filter_function.call(filter_tags, function(tag) {return group_object.tags.indexOf(tag) >= 0;}))
 				return;
+
+		// Count unique members in the currently shown groups
+		$.each(group_object.member_objects_by_alias, function(alias, member_object) {
+			shown_groups_aliases[alias] = null;
+		});
 		
 		li_elements.push( "<li onclick='showGroup(" + group_object.id + ")'>" + group_object.label + " (" + group_object.getMemberCount() + ")</li>" );
 		group_count++;
 	});
+	
+	var unique_filtered_member_count = 0;
+	var aggregate_member_list = [];
+	$.each(shown_groups_aliases, function(alias, value) {
+		aggregate_member_list.push(alias);
+		unique_filtered_member_count++;
+	});
+	var aggregate_member_holder = $("#aggregate_member_list");
+	aggregate_member_holder.html( aggregate_member_list.join(", ") );
+	
 
-	$( "#group_list_header" ).html( "" + group_count + " Group(s)" );	
+	$( "#group_list_header" ).html( "" + group_count + " Group(s), " + unique_filtered_member_count + " member(s)" );	
 	$( "#group_list" ).html( li_elements.join("") );
 	
 	if (!group_count) {
@@ -172,6 +196,14 @@ function renderGroups() {
 			$( "#instructions_no_groups" ).hide();
 		}
 	}
+}
+
+//============================================================================
+function changeTagFilterCriteria(radio_button) {
+
+	var radio_button_value = $(radio_button).val();
+	
+	renderGroups();
 }
 
 //============================================================================
@@ -225,11 +257,8 @@ function changeGroupName(input_textbox) {
 //============================================================================
 function updateGroupFilter() {
 
-	console.log("tag count: " + filter_tags.length);
 	var html_contents = filter_tags.map(renderTagItem, {editable: true, remove_function_name: "removeFilterTag"}).join(", ");
-	console.log("html_contents: " + html_contents);
-	
-	// Render tag list
+
 	$( "#filter_tags_list" ).html(html_contents);
 	renderGroups();
 }
