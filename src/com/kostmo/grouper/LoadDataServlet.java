@@ -76,9 +76,7 @@ public class LoadDataServlet extends HttpServlet {
 			try {
 				Connection postgres_connection = PostgresData.getPostgresConnection(this);
 				groups = PostgresData.loadGroups(postgres_connection, request.getRemoteUser());
-				
-				System.out.println("Should have " + groups.size() + " groups.");
-				
+
 				for (Group g : groups.values()) {
 					
 					Map<String, GroupMember> group_members = PostgresData.loadGroupMembers(postgres_connection, g.id);

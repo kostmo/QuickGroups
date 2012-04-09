@@ -2,6 +2,10 @@ fieldset {
 	margin-bottom: 0.5em;
 }
 
+#container td {
+	vertical-align: top;
+}
+
 .login-info {
 	float: right;
 }
@@ -71,15 +75,6 @@ button.dirty_save_button:active {
 	margin: 0.4 em;
     border-radius: 5px;
     background-color: rgb(240,240,255);
-}
-
-#left {
-    width: 275px;
-    float: left;
-}
-
-#right {
-    margin-left: 300px; /* Change this to whatever the width of your left column is*/
 }
 
 .clear {

@@ -1,9 +1,3 @@
-var fullname_cache = {};	// A mapping from aliases to full names
-
-var active_group_id = null;
-var group_objects_by_id = {};
-
-//============================================================================
 //Handler for .ready() called.
 $(function() {
 
@@ -62,38 +56,8 @@ $(function() {
 	});
 
 	
-	$( "#tag_input" ).autocomplete({
-		source: function(request, response) {
-			$( "#tag_hourglass_img" ).show();
-			$.getJSON("tags", {
-				term: request.term
-			},
-				function(data) {
-					$( "#tag_hourglass_img" ).hide();
-					response(data);
-			});
-		},
-		autoFocus: true,
-		select: function(event, ui) {
-			var tag = ui.item.value;
-			addTag(tag);
-		},
-		change: function(event, ui) {
-			if (ui.item != null) {
-				var tag = ui.item.value;
-				addTag(tag);
-			} else {
-//				console.log("Changed item, but it was null.");
-			}
-		},
-	});
-	
-	
-	$( "#tag_input" ).keyup(function(event){
-	    if(event.keyCode == 13){
-			addTag( $( this ).val() );
-	    }
-	});
+	setupTagList("filter_tag_input", "filter_hourglass_img", addFilterTag);
+	setupTagList("group_tag_input", "group_tag_hourglass_img", addGroupTag);
 	
 	
 	$("#group_label").mouseup(function(e){
@@ -108,6 +72,38 @@ $(function() {
 		renderGroups();
 	}, 4);
 });
+
+//============================================================================
+function setupTagList(input_id, throbber_id, tag_adding_function) {
+	
+	var autocomplete_element = $( "#" + input_id );
+	autocomplete_element.autocomplete({
+		source: function(request, response) {
+
+			var throbber_element = $( "#" + throbber_id );
+			throbber_element.show();
+			$.getJSON("tags", {
+				term: request.term
+			},
+			function(data) {
+				throbber_element.hide();
+				response(data);
+			});
+		},
+		autoFocus: true,
+		select: function(event, ui) {
+			var tag = ui.item.value;
+			tag_adding_function(tag);
+		},
+	});
+	
+	
+	autocomplete_element.keyup(function(event){
+	    if(event.keyCode == 13){
+	    	tag_adding_function( $( this ).val() );
+	    }
+	});
+}
 
 //============================================================================
 $(window).bind('beforeunload', function(){
@@ -151,7 +147,13 @@ function renderGroups() {
 	var group_count = 0;
 	var li_elements = [];
 	$.each(sorted_dictionary_keys, function(key_index, key_value) {
+
 		var group_object = group_objects_by_id[key_value];
+		
+		if (filter_tags.length > 0)
+			if (!filter_tags.some(function(tag) {return group_object.tags.indexOf(tag) >= 0;}))
+				return;
+		
 		li_elements.push( "<li onclick='showGroup(" + group_object.id + ")'>" + group_object.label + " (" + group_object.getMemberCount() + ")</li>" );
 		group_count++;
 	});
@@ -221,6 +223,18 @@ function changeGroupName(input_textbox) {
 }
 
 //============================================================================
+function updateGroupFilter() {
+
+	console.log("tag count: " + filter_tags.length);
+	var html_contents = filter_tags.map(renderTagItem, {editable: true, remove_function_name: "removeFilterTag"}).join(", ");
+	console.log("html_contents: " + html_contents);
+	
+	// Render tag list
+	$( "#filter_tags_list" ).html(html_contents);
+	renderGroups();
+}
+
+//============================================================================
 function showGroup(group_id) {
 
 	if (group_id == null) {
@@ -239,7 +253,7 @@ function showGroup(group_id) {
 
 
 	// Render tag list
-	$( "#tags_list" ).html(group_object.tags.map(renderTagItem).join(", "));
+	$( "#group_tags_list" ).html(group_object.tags.map(renderTagItem, {editable: group_object.mine, remove_function_name: "removeGroupTag"}).join(", "));
 	
 	if (group_object.mine || group_object.is_self_serve) {
 		
@@ -291,9 +305,8 @@ function showGroup(group_id) {
 function renderTagItem(tag) {
 	var remove_command = "";
 
-	var group = getActiveGroup();
-	if (group.mine)
-		remove_command = " <span class='remove_member' onclick='removeTag(\"" + tag + "\");'>[<img style='vertical-align: middle' src='images/tiny_trashcan.png' title='Remove' alt='trash can'>]</span>";
+	if (this.editable)
+		remove_command = " <span class='remove_member' onclick='" + this.remove_function_name + "(\"" + tag + "\");'>[<img style='vertical-align: middle' src='images/tiny_trashcan.png' title='Remove' alt='trash can'>]</span>";
 
 	return "<span style=''>" + tag + "</span>" + remove_command;
 }

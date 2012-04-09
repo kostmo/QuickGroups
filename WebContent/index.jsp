@@ -33,74 +33,80 @@ var company_domain = "example.com"; // FIXME
 	<span class="status_message" id="status_message">Loading...</span>
 
 
-	<div id="container" style="margin-bottom: .4em;">
+	<table id="container">
+		<tr>
+			<td style="min-width: 250px">Show groups with tags:
 
-		<div id="left">
-
-			<div id="outer_grouplist_container">
-
-				Show groups with tags:
-				<div id="group_filter_taglist"></div>
-
-				<h3>
-					<span id="group_list_header">Loading...</span> <img
+				<div id="filter_tags_list"></div>
+				<div class='ui-widget'>
+					<label for='filter_tag_input'>Add tag filter: </label><input
+						id='filter_tag_input' /> <img
 						style='display: none; vertical-align: middle;'
-						id='group_load_hourglass_img' src='images/square-ajax-loader.gif' />
-				</h3>
-				<button onclick='newGroup();'>New group</button>
-				<ul id="group_list"></ul>
+						id='filter_hourglass_img' src='images/square-ajax-loader.gif' />
+				</div> <br />
+				<button onclick='newGroup();'>New group</button> <br />
+				<button onclick="toggle_advanced_bulk_options(this)">Show
+					Advanced &gt;&gt;</button>
 
-			</div>
-			<button onclick="toggle_advanced_bulk_options(this)">Show Advanced &gt;&gt;</button>
+				<fieldset id="advanced_bulk_options" style="display: none">
+					<legend>Exporting</legend>
 
-			<fieldset id="advanced_bulk_options" style="display: none">
-				<legend>Exporting</legend>
+					<button onclick='exportAllGroups();'>Export all</button>
+					<p>
+						Format:<br /> <label><input
+							onchange="changeExportType(this);" type="radio"
+							name="export_radio_group" value="XML" />XML</label><br /> <label><input
+							onchange="changeExportType(this);" type="radio"
+							name="export_radio_group" value="JSON" />JSON</label><br /> <label><input
+							onchange="changeExportType(this);" type="radio"
+							name="export_radio_group" value="CSV" />CSV</label>
+					</p>
+					<a id="query_url" href="blah">Machine query link</a>
+				</fieldset>
+			</td>
+			<td style="min-width: 250px">
 
-				<button onclick='exportAllGroups();'>Export all</button>
-				<p>
-					Format:<br /> <label><input
-						onchange="changeExportType(this);" type="radio"
-						name="export_radio_group" value="XML" />XML</label><br /> <label><input
-						onchange="changeExportType(this);" type="radio"
-						name="export_radio_group" value="JSON" />JSON</label><br /> <label><input
-						onchange="changeExportType(this);" type="radio"
-						name="export_radio_group" value="CSV" />CSV</label>
-				</p>
-				<a id="query_url" href="blah">Machine query link</a>
-			</fieldset>
-
-		</div>
+				<div id="outer_grouplist_container">
 
 
-		<div id="right">
+					<h3>
+						<span id="group_list_header">Loading...</span> <img
+							style='display: none; vertical-align: middle;'
+							id='group_load_hourglass_img' src='images/square-ajax-loader.gif' />
+					</h3>
+					<ul id="group_list"></ul>
 
-			<table id="group_info_display" style="display: none">
-				<tr>
-					<td style="vertical-align: top">
-						<h3>Group membership:</h3>
-						<div class='ui-widget'>
-							<label for='namefield'>Add Member: </label><input
-								class="modifying_actions" id='namefield' /> <img
-								style='display: none; vertical-align: middle;'
-								id='hourglass_img' src='images/square-ajax-loader.gif' />
-						</div>
+				</div>
 
-						 Search by: <label><input
-							type="radio"
-							name="search_by_radio_group" value="alias" checked="checked" />Alias</label>
-						<label><input type="radio"
-							name="search_by_radio_group" value="name" />Full Name</label>
-							
-						<p><button class="modifying_actions"
-									onclick='bulkMemberAdd();'>Bulk Member Add</button></p>
-						<h4>Current members:</h4>
-						<div id="current_members_box">
-						<span id="member_count">0
-							member(s).</span>
-						<ul id='group_holder'></ul></div>
+			</td>
+			<td style="min-width: 250px">
 
-					</td>
-					<td style="vertical-align: top; padding-left: 20px">
+				<table id="group_info_display" style="display: none">
+					<tr>
+						<td style="vertical-align: top">
+							<h3>Group membership:</h3>
+							<div class='ui-widget'>
+								<label for='namefield'>Add Member: </label><input
+									class="modifying_actions" id='namefield' /> <img
+									style='display: none; vertical-align: middle;'
+									id='hourglass_img' src='images/square-ajax-loader.gif' />
+							</div> Search by: <label><input type="radio"
+								name="search_by_radio_group" value="alias" checked="checked" />Alias</label>
+							<label><input type="radio" name="search_by_radio_group"
+								value="name" />Full Name</label>
+
+							<p>
+								<button class="modifying_actions" onclick='bulkMemberAdd();'>Bulk
+									Member Add</button>
+							</p>
+							<h4>Current members:</h4>
+							<div id="current_members_box">
+								<span id="member_count">0 member(s).</span>
+								<ul id='group_holder'></ul>
+							</div>
+
+						</td>
+						<td style="vertical-align: top; padding-left: 20px">
 
 							<fieldset>
 								<legend>Group properties</legend>
@@ -120,16 +126,20 @@ var company_domain = "example.com"; // FIXME
 										<td><label for="is_self_serve"> Self-serve
 												membership</label></td>
 									</tr>
+
+
+
 								</table>
 								<h4>Tags:</h4>
-							<div id="tags_list"></div>
-							<div class='ui-widget'>
-								<label for='tag_input'>Add Tag: </label><input
-									class="modifying_actions" id='tag_input' /> <img
-									style='display: none; vertical-align: middle;'
-									id='tag_hourglass_img' src='images/square-ajax-loader.gif' />
-							</div>
-						</fieldset>
+								<div id="group_tags_list"></div>
+								<div class='ui-widget'>
+									<label for='group_tag_input'>Add Tag: </label><input
+										class="modifying_actions" id='group_tag_input' /> <img
+										style='display: none; vertical-align: middle;'
+										id='group_tag_hourglass_img'
+										src='images/square-ajax-loader.gif' />
+								</div>
+							</fieldset>
 
 							<fieldset>
 								<legend>Group maintainer</legend>
@@ -138,11 +148,13 @@ var company_domain = "example.com"; // FIXME
 									<label for='maintainer_field'></label><input
 										class="modifying_actions" id='maintainer_field' /> <img
 										style='display: none; vertical-align: middle;'
-										id='maintainer_hourglass_img' src='images/square-ajax-loader.gif' />
+										id='maintainer_hourglass_img'
+										src='images/square-ajax-loader.gif' />
 									<button class="modifying_actions"
-									onclick='transferOwnership($("#maintainer_field").val());'>Transfer ownership</button>
+										onclick='transferOwnership($("#maintainer_field").val());'>Transfer
+										ownership</button>
 								</div>
-								
+
 							</fieldset>
 
 							<fieldset>
@@ -153,11 +165,11 @@ var company_domain = "example.com"; // FIXME
 								<button class="modifying_actions"
 									onclick='deleteGroup(active_group_id);'>Delete</button>
 
-								<button class="modifying_actions" onclick="toggle_merge_options()">Merge &gt;&gt;</button>
-								<div id="merge_options" style="display: none">
-									From group: 
+								<button class="modifying_actions"
+									onclick="toggle_merge_options()">Merge &gt;&gt;</button>
+								<div id="merge_options" style="display: none">From group:
 								</div>
-								
+
 							</fieldset>
 
 							<fieldset>
@@ -169,11 +181,12 @@ var company_domain = "example.com"; // FIXME
 								<a id="group_email_url" href="mailto:">Send email to group</a>
 							</fieldset>
 
-					</td>
-				</tr>
-			</table>
-		</div>
-	</div>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
 	<hr class="clear" />
 	<a href="about.html">About</a>
 </body>

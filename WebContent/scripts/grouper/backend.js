@@ -1,3 +1,10 @@
+var fullname_cache = {};	// A mapping from aliases to full names
+
+var active_group_id = null;
+var group_objects_by_id = {};
+var filter_tags = [];
+
+//============================================================================
 function reloadGroupData(completion_callback, callback_args) {
 
 	console.log("Reloading group data...");
@@ -159,11 +166,31 @@ function bulkMemberAdd() {
 	}
 }
 
+//============================================================================
+function addFilterTag(tag) {
+
+	var idx = filter_tags.indexOf(tag);
+	if (idx < 0) {
+		filter_tags.push(tag);
+		updateGroupFilter();
+	}
+}
+
+//============================================================================
+function removeFilterTag(tag) {
+
+	var idx = filter_tags.indexOf(tag);
+	if (idx >= 0) {
+		filter_tags.splice(idx, 1);
+		updateGroupFilter();
+	}
+}
+
 // ============================================================================
-function addTag(tag) {
+function addGroupTag(tag) {
 
 	var active_group = getActiveGroup();
-	var idx = active_group.tags.indexOf(tag); // Find the index
+	var idx = active_group.tags.indexOf(tag);
 	if (idx < 0) {
 		active_group.tags.push(tag);
 		active_group.markDirty();
@@ -171,10 +198,10 @@ function addTag(tag) {
 }
 
 // ============================================================================
-function removeTag(tag) {
+function removeGroupTag(tag) {
 
 	var active_group = getActiveGroup();
-	var idx = active_group.tags.indexOf(tag); // Find the index
+	var idx = active_group.tags.indexOf(tag);
 	if (idx >= 0) {
 		active_group.tags.splice(idx, 1);
 		active_group.markDirty();
