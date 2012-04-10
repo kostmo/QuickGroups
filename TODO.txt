@@ -1,6 +1,9 @@
 * Display groups grouped by owner
 * Wrap save operations in database transaction
 
+* When a tag is added to a group, update the filtered groups display.
+* Use "Filter" object to 
+
 * Ability to list all members in all groups of the currently active tag filter
 * Ability to save a named tag filter
 * Ability to "star" or "favorite" tag filters
