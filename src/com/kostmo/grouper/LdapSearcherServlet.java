@@ -57,10 +57,7 @@ public class LdapSearcherServlet extends HttpServlet {
 			if (partial_name != null)
 				subfilter = "(" + ad_search_field + "=" + partial_name +"*)";
 
-			
-			subfilter = "(&" + subfilter + "(objectCategory=person)(objectClass=user)(|(memberOf=CN=Employees,OU=Groups,OU=Tesla Users,DC=teslamotors,DC=com)(memberOf=CN=Contractors,OU=Groups,OU=Tesla Users,DC=teslamotors,DC=com)))";
-			
-			SearchResult searchResult = LdapHelper.getLdapSearchResult(ldap_properties, subfilter);
+			SearchResult searchResult = LdapHelper.getGroupFileteredLdapSearchResult(ldap_properties, subfilter);
 
 			System.out.println(searchResult.getEntryCount() + " entries returned.");
 			for (SearchResultEntry e : searchResult.getSearchEntries()) {
@@ -68,8 +65,6 @@ public class LdapSearcherServlet extends HttpServlet {
 				result_entry.put("value", e.getAttributeValue(attributes[0]));
 				result_entry.put("label", e.getAttributeValue(attributes[1]));
 				names.add(result_entry);
-				
-				System.out.println(e.toLDIFString());
 			}
 
 		} catch (LDAPException e) {
@@ -77,10 +72,8 @@ public class LdapSearcherServlet extends HttpServlet {
 		}
 
 
-
 		StringWriter json_out = new StringWriter();
 		names.writeJSONString(json_out);
-
 
 		PrintWriter out = response.getWriter();
 		out.append( json_out.toString() );

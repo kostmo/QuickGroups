@@ -38,17 +38,37 @@ public class LdapHelper {
 		
 		return ldap_properties;
 	}
-	
-	public static SearchResult getLdapSearchResult(Properties ldap_properties, String member_filter) throws LDAPException {
+
+
+	public static SearchResult getLdapSearchResult(Properties ldap_properties, String filter) throws LDAPException {
 
 		String[] attributes = getLdapAttributes(ldap_properties);
+		return getLdapSearchResult(ldap_properties, filter, attributes);
+	}
+	
+
+	public static SearchResult getLdapSearchResult(Properties ldap_properties, String filter, String[] attributes) throws LDAPException {
+
 		LDAPConnection ldap_connection = new LDAPConnection(
 				ldap_properties.getProperty("host"),
 				Integer.parseInt(ldap_properties.getProperty("port")),
 				ldap_properties.getProperty("user"),
 				ldap_properties.getProperty("password"));
 
-		Collection<String> group_common_names = Arrays.asList( ldap_properties.getProperty("group_common_names").split(",") );
+		SearchResult result = ldap_connection.search(
+				ldap_properties.getProperty("baseDN"),
+				SearchScope.SUB,
+				Filter.create(filter),
+				attributes);
+
+		ldap_connection.close();
+		return result;
+	}
+
+
+	public static SearchResult getGroupFileteredLdapSearchResult(Properties ldap_properties, String member_filter) throws LDAPException {
+
+		Collection<String> group_common_names = Arrays.asList( ldap_properties.getProperty("group_common_names").split(";") );
 		final String group_base_name = ldap_properties.getProperty("group_base_dn");
 		
 		String group_filter = StringUtils.join(Collections2.transform(group_common_names, new Function<String, String>() {
@@ -57,13 +77,9 @@ public class LdapHelper {
 				return "(memberOf=CN=" + group_name + "," + group_base_name + ")";
 			}
 		}), "");
-		
+
 		String filter_with_groups = "(&" + member_filter + "(|" + group_filter + "))";
-		return ldap_connection.search(
-				ldap_properties.getProperty("baseDN"),
-				SearchScope.SUB,
-				Filter.create(filter_with_groups),
-				attributes);
+		return getLdapSearchResult(ldap_properties, filter_with_groups);
 	}
 	
 	/**
