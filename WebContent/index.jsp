@@ -17,7 +17,7 @@
 
 <script type="text/javascript">
 var logged_in_username = "<%=request.getRemoteUser()%>";
-var company_domain = "example.com"; // FIXME
+var company_domain = "${company_domain}";
 </script>
 
 </head>
