@@ -29,7 +29,6 @@ public class IndexServlet extends HttpServlet {
 	    ServletContext sc = getServletContext();
 	    RequestDispatcher rd = sc.getRequestDispatcher(url);
 
-	    
 	    try {
 			String company_domain = LdapHelper.getLdapProperties(this).getProperty("company_domain");
 		    request.setAttribute("company_domain", company_domain );

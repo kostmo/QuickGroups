@@ -46,7 +46,6 @@ var company_domain = "${company_domain}";
 							onchange="changeTagFilterCriteria(this);" type="radio"
 							name="tag_filter_radio_group" value="all" />All</label>
 							
-							
 				<div class='ui-widget'>
 					<label for='filter_tag_input'>Add tag filter: </label><input
 						id='filter_tag_input' /> <img
@@ -131,15 +130,13 @@ var company_domain = "${company_domain}";
 										<td><input class="modifying_actions"
 											onchange="changePublicVisibility(this);" id='is_public'
 											type='checkbox' /></td>
-										<td><label for="is_public"> Publicly visible</label></td>
+										<td><label for="is_public" title="Everyone can see this group"> Publicly visible</label></td>
 										<td><input class="modifying_actions"
 											onchange="changeSelfServe(this);" id='is_self_serve'
 											type='checkbox' /></td>
-										<td><label for="is_self_serve"> Self-serve
+										<td><label for="is_self_serve" title="People can add and remove themselves"> Self-serve
 												membership</label></td>
 									</tr>
-
-
 
 								</table>
 								<h4>Tags:</h4>
