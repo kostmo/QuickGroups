@@ -102,10 +102,11 @@ var company_domain = "${company_domain}";
 									style='display: none; vertical-align: middle;'
 									id='hourglass_img' src='images/square-ajax-loader.gif' />
 							</div> Search by: <label><input type="radio"
-								name="search_by_radio_group" value="alias" checked="checked" />Alias</label>
+								name="search_by_radio_group" value="alias" />Alias</label>
 							<label><input type="radio" name="search_by_radio_group"
 								value="name" />Full Name</label>
-
+							<label><input type="radio" name="search_by_radio_group"
+								value="both" checked="checked"/>Both</label>
 							<p>
 								<button class="modifying_actions" onclick='bulkMemberAdd();'>Bulk
 									Member Add</button>

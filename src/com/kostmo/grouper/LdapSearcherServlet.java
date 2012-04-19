@@ -3,6 +3,8 @@ package com.kostmo.grouper;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Properties;
 
 import javax.servlet.ServletException;
@@ -11,9 +13,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;
@@ -46,17 +51,31 @@ public class LdapSearcherServlet extends HttpServlet {
 		Properties ldap_properties = LdapHelper.getLdapProperties(this);
 		String[] attributes = LdapHelper.getLdapAttributes(ldap_properties);	
 		
-		String partial_name = request.getParameter("term");
+		final String partial_name = request.getParameter("term");
 		String field = request.getParameter("field");
-		String ad_search_field = "alias".equals(field) ? attributes[0] : attributes[1];
+
+		Collection<String> rules = new ArrayList<String>();
+		if ("alias".equals(field) || "both".equals(field))
+			rules.add(attributes[0]);
+		if ("name".equals(field) || "both".equals(field))
+			rules.add(attributes[1]);
+		
+		
+		
+		String multi_rule_query = StringUtils.join(Collections2.transform(rules, new Function<String, String>() {
+			@Override
+			public String apply(String rule) {
+				return "(" + rule + "=" + partial_name + "*)";
+			}
+		}), "");
+
+		
+		
 		
 		JSONArray names = new JSONArray();
 		try {
 
-			String subfilter = "(" + ad_search_field + "=" + partial_name +"*)";
-			if (partial_name != null)
-				subfilter = "(" + ad_search_field + "=" + partial_name +"*)";
-
+			String subfilter = "(|" + multi_rule_query +")";
 			SearchResult searchResult = LdapHelper.getGroupFileteredLdapSearchResult(ldap_properties, subfilter);
 
 			System.out.println(searchResult.getEntryCount() + " entries returned.");
