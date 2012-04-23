@@ -7,6 +7,20 @@ $(function() {
 	$(first_radio_element).attr('checked', true);
 	first_radio_element.onchange();
 
+	
+	$('#group_label_editbox').editable(function(value, settings) {
+		
+		changeGroupName(value);
+
+	     console.log(value);
+	     return value;
+	  }, { 
+	     type    : 'text',
+	     submit  : 'OK',
+	 });
+	
+	
+	
 	$( "#namefield" ).autocomplete({
 		source: function(request, response) {
 			$( "#hourglass_img" ).show();
@@ -60,10 +74,10 @@ $(function() {
 	setupTagList("group_tag_input", "group_tag_hourglass_img", addGroupTag);
 	
 	
-	$("#group_label").mouseup(function(e){
+	$("#group_label_editbox").mouseup(function(e){
         e.preventDefault();
 	});
-	$("#group_label").focus(function() {
+	$("#group_label_editbox").focus(function() {
 		$(this).select();
 	});
 
@@ -149,7 +163,7 @@ function renderGroups() {
 		return dict[key].label.toLowerCase();
 	});
 	
-	var filter_criteria_value = $('input:radio[name=tag_filter_radio_group]:checked').val();
+	var filter_criteria_value = $('tag_filter_criteria').val();
 	
 	var shown_groups_aliases = {};
 	var group_count = 0;
@@ -168,7 +182,7 @@ function renderGroups() {
 			shown_groups_aliases[alias] = null;
 		});
 		
-		li_elements.push( "<li onclick='showGroup(" + group_object.id + ")'>" + group_object.label + " (" + group_object.getMemberCount() + ")</li>" );
+		li_elements.push( "<li onclick='showGroup(" + group_object.id + ")'>" + group_object.label + " <b>(" + group_object.getMemberCount() + ")</b></li>" );
 		group_count++;
 	});
 	
@@ -248,9 +262,9 @@ function changeSelfServe(checkbox_element) {
 }
 
 //============================================================================
-function changeGroupName(input_textbox) {
+function changeGroupName(new_group_name) {
 	var active_group = getActiveGroup();
-	active_group.label = $( input_textbox ).val();
+	active_group.label = new_group_name;
 	active_group.markDirty();
 }
 
@@ -276,7 +290,7 @@ function showGroup(group_id) {
 	active_group_id = group_id;
 	
 	var group_object = getActiveGroup();
-	$( "#group_label" ).val(group_object.label);
+	$( "#group_label_editbox" ).text(group_object.label);
 	$( "#is_public" ).attr('checked', group_object.is_public);
 	$( "#is_self_serve" ).attr('checked', group_object.is_self_serve);
 
@@ -335,9 +349,9 @@ function renderTagItem(tag) {
 	var remove_command = "";
 
 	if (this.editable)
-		remove_command = " <span class='remove_member' onclick='" + this.remove_function_name + "(\"" + tag + "\");'>[<img style='vertical-align: middle' src='images/tiny_trashcan.png' title='Remove' alt='trash can'>]</span>";
+		remove_command = " <span class='remove_member' onclick='" + this.remove_function_name + "(\"" + tag + "\");'><img style='vertical-align: top' src='images/tiny_trashcan.png' title='Remove' alt='trash can'></span>";
 
-	return "<span style=''>" + tag + "</span>" + remove_command;
+	return "<span class='group_tag'>" + tag + remove_command + "</span>";
 }
 
 //============================================================================

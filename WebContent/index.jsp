@@ -7,6 +7,7 @@
 <script src='scripts/ui/jquery.ui.widget.js'></script>
 <script src='scripts/ui/jquery.ui.position.js'></script>
 <script src='scripts/ui/jquery.ui.autocomplete.js'></script>
+<script src='scripts/ui/jquery.jeditable.js'></script>
 
 <script src='scripts/grouper/object_definitions.js'></script>
 <script src='scripts/grouper/backend.js'></script>
@@ -35,16 +36,12 @@ var company_domain = "${company_domain}";
 
 	<table id="container">
 		<tr>
-			<td style="min-width: 250px">Show groups with tags:
+			<td style="min-width: 250px"><span style="vertical-align: middle">Show groups with
+			<select onchange="changeTagFilterCriteria(this);" id="tag_filter_criteria">
+			<option value="any" selected="selected">Any</option>
+				<option value="all">All</option></select> tags:</span>
 
 				<div id="filter_tags_list"></div>
-				
-				<label><input
-							onchange="changeTagFilterCriteria(this);" type="radio"
-							name="tag_filter_radio_group" value="any" checked="checked"/>Any</label>
-				<label><input
-							onchange="changeTagFilterCriteria(this);" type="radio"
-							name="tag_filter_radio_group" value="all" />All</label>
 							
 				<div class='ui-widget'>
 					<label for='filter_tag_input'>Add tag filter: </label><input
@@ -95,22 +92,23 @@ var company_domain = "${company_domain}";
 				<table id="group_info_display" style="display: none">
 					<tr>
 						<td style="vertical-align: top">
+
+							<h2><span id='group_label_editbox'>noname</span> <img src="images/tiny_pencil.png"/></h2>
+						
 							<h3>Group membership:</h3>
 							<div class='ui-widget'>
 								<label for='namefield'>Add Member: </label><input
 									class="modifying_actions" id='namefield' /> <img
 									style='display: none; vertical-align: middle;'
 									id='hourglass_img' src='images/square-ajax-loader.gif' />
-							</div> Search by: <label><input type="radio"
+							</div>
+							<div id="search_filter_criteria" style="display: none">Search by: <label><input type="radio"
 								name="search_by_radio_group" value="alias" />Alias</label>
 							<label><input type="radio" name="search_by_radio_group"
 								value="name" />Full Name</label>
 							<label><input type="radio" name="search_by_radio_group"
 								value="both" checked="checked"/>Both</label>
-							<p>
-								<button class="modifying_actions" onclick='bulkMemberAdd();'>Bulk
-									Member Add</button>
-							</p>
+							</div>
 							<h4>Current members:</h4>
 							<div id="current_members_box">
 								<span id="member_count">0 member(s).</span>
@@ -122,9 +120,6 @@ var company_domain = "${company_domain}";
 
 							<fieldset>
 								<legend>Group properties</legend>
-
-								Group label: <input onchange="changeGroupName(this);"
-									type='text' id='group_label' value='Untitled Group' /><br />
 								<table>
 									<tr>
 										<td>
@@ -140,8 +135,12 @@ var company_domain = "${company_domain}";
 									</tr>
 
 								</table>
-								<h4>Tags:</h4>
-								<div id="group_tags_list"></div>
+							</fieldset>
+							
+							<fieldset>
+								<legend>Tags</legend>
+
+								<span id="group_tags_list"></span>
 								<div class='ui-widget'>
 									<label for='group_tag_input'>Add Tag: </label><input
 										class="modifying_actions" id='group_tag_input' /> <img
@@ -174,12 +173,12 @@ var company_domain = "${company_domain}";
 								<button onclick='copyGroup(active_group_id);'>Copy</button>
 								<button class="modifying_actions"
 									onclick='deleteGroup(active_group_id);'>Delete</button>
-
+								<button class="modifying_actions" onclick='bulkMemberAdd();'>Bulk Add</button>
 								<button class="modifying_actions"
 									onclick="toggle_merge_options()">Merge &gt;&gt;</button>
 								<div id="merge_options" style="display: none">From group:
 								</div>
-
+								
 							</fieldset>
 
 							<fieldset>

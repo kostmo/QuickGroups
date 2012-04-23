@@ -276,7 +276,6 @@ public class PostgresData {
 	public static void reconcileGroupTags(Connection con, Group modified_group) throws SQLException {
 
 		Map<String, Long> existing_tags = loadGroupTags(con, modified_group.id);
-		System.out.println("Tags for group '" + modified_group.label + "' (id '" + modified_group.id + "') known in database: " + existing_tags.keySet());
 		
 		// Delete tag associations for tags that are no longer present
 		Collection<Long> tag_ids_to_delete = new HashSet<Long>();
@@ -292,8 +291,7 @@ public class PostgresData {
 		for (String pending_tag : modified_group.tags)
 			if (!existing_tags.containsKey(pending_tag))
 				tags_to_add.add(pending_tag);
-		
-		System.out.println("About to add tags to group '" + modified_group.label + "': " + tags_to_add);
+
 		makeTagAssociations(con, tags_to_add, modified_group.id, modified_group.owner);
 	}
 	

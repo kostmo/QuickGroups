@@ -259,8 +259,6 @@ function saveGroup() {
 
 	var new_group = getActiveGroup();
 
-	var group_label = $("#group_label").val();
-	new_group.label = group_label;
 	new_group.is_self_serve = $('#is_self_serve').is(':checked');
 	new_group.is_public = $('#is_public').is(':checked');
 

@@ -39,6 +39,12 @@ button.dirty_save_button:active {
     color: black;
 }
 
+.group_tag {
+	border-radius: 5px;
+    background-color: rgb(255,220,150);
+    padding: 2px;
+}
+
 #current_members_box {
 	border: 5px solid rgb(255,255,150);
 	border-radius: 5px;

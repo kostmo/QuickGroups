@@ -55,6 +55,8 @@ public class LdapHelper {
 				ldap_properties.getProperty("user"),
 				ldap_properties.getProperty("password"));
 
+//		System.out.println("Full search filter: " + filter);
+		
 		SearchResult result = ldap_connection.search(
 				ldap_properties.getProperty("baseDN"),
 				SearchScope.SUB,
@@ -68,13 +70,11 @@ public class LdapHelper {
 
 	public static SearchResult getGroupFileteredLdapSearchResult(Properties ldap_properties, String member_filter) throws LDAPException {
 
-		Collection<String> group_common_names = Arrays.asList( ldap_properties.getProperty("group_common_names").split(";") );
-		final String group_base_name = ldap_properties.getProperty("group_base_dn");
-		
-		String group_filter = StringUtils.join(Collections2.transform(group_common_names, new Function<String, String>() {
+		Collection<String> groups = Arrays.asList( ldap_properties.getProperty("groups").split(";") );
+		String group_filter = StringUtils.join(Collections2.transform(groups, new Function<String, String>() {
 			@Override
 			public String apply(String group_name) {
-				return "(memberOf=CN=" + group_name + "," + group_base_name + ")";
+				return "(memberOf=" + group_name + ")";
 			}
 		}), "");
 

@@ -61,7 +61,8 @@ public class NameLookupServlet extends HttpServlet {
 		JSONObject names = new JSONObject();
 		try {
 
-			SearchResult searchResult = LdapHelper.getGroupFileteredLdapSearchResult(ldap_properties, "(|" + multi_name_query + ")");
+			String ad_query_filter = "(|" + multi_name_query + ")";
+			SearchResult searchResult = LdapHelper.getGroupFileteredLdapSearchResult(ldap_properties, ad_query_filter);
 			for (SearchResultEntry e : searchResult.getSearchEntries())
 				names.put(e.getAttributeValue(attributes[0]), e.getAttributeValue(attributes[1]));
 
