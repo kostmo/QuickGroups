@@ -17,11 +17,15 @@
 	<h2>Use cases</h2>
 	<ul>
 		<li>Finding the right people to include on a new e-mail thread</li>
+		<li>Broadcasting available skills in an organization</li>
 		<li>Dynamic groups for which the utility would be reduced by slow AD admin response times</li>
 	</ul>
 
-	<h2>Motivation</h2>
+	<h2>Design Goals / Motivation</h2>
 	<ul>
+		<li>Distributed-maintenance</li>
+		<li>Avoids AD administrator turnaround time</li>
+		<li>Lighter-weight and less "official" than actual AD groups</li>
 		<li>Group creation does not require AD administrator approval</li>
 		<li>Could be used for "drafting" true AD groups
 			<ul>
@@ -32,15 +36,7 @@
 		<li>Query-able without requiring AD credentials</li>
 	</ul>
 
-	<h2>Design Goals</h2>
-	<ul>
-		<li>Distributed-maintenance</li>
-		<li>Avoids AD administrator turnaround time</li>
-		<li>Lighter-weight and less "official" than actual AD groups</li>
-	</ul>
-
-
-	<h2>Design rationale</h2>
+	<h2>Design choices</h2>
 	<p>I wanted to be able to infer new groups from existing groups.
 		There are two opposing approaches for this:
 	<ul>
@@ -64,8 +60,7 @@
 
 	<h2>TODO</h2>
 	<ul>
-		<li>May also be useful in Jira plugins for automatic field
-			population logic</li>
+		<li>May also be useful in Jira plugins for automatic field population logic</li>
 	</ul>
 	Written by Karl Ostmo
 	<br />
