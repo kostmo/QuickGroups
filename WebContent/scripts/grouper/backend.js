@@ -2,6 +2,7 @@ var fullname_cache = {};	// A mapping from aliases to full names
 
 var active_group_id = null;
 var group_objects_by_id = {};
+var proficiency_labels = {};
 var filter_tags = [];
 
 //============================================================================
@@ -18,13 +19,18 @@ function reloadGroupData(completion_callback, callback_args) {
 
 		// clear the dictionary first
 		group_objects_by_id = {};
-
+		proficiency_labels = {};
+		
 		if (data.success) {
+			
+			proficiency_labels = data.proficiency_labels;
+			
 			$.each(data.groups, function(index, group_as_dict) {
 				var g = new Group(group_as_dict["label"]);
 				g.id = group_as_dict["id"];
-				g.is_self_serve = group_as_dict["is_self_serve"];
 				g.is_public = group_as_dict["is_public"];
+				g.is_self_serve = group_as_dict["is_self_serve"];
+				g.is_skill = group_as_dict["is_skill"];
 				g.tags = group_as_dict["tags"];
 				g.mine = group_as_dict["mine"];
 
@@ -34,6 +40,7 @@ function reloadGroupData(completion_callback, callback_args) {
 					var m = new GroupMember(alias);
 					m.set_by = member_as_dict["set_by"];
 					m.modified = member_as_dict["modified"];
+					m.proficiency = member_as_dict["proficiency"];
 					g.member_objects_by_alias[alias] = m;
 				});
 
@@ -129,6 +136,18 @@ function removeMember(alias) {
 	var active_group = getActiveGroup();
 	if (alias in active_group.member_objects_by_alias) {
 		delete active_group.member_objects_by_alias[alias];
+		active_group.markDirty();
+	}
+}
+
+//============================================================================
+function updateRating(dropdown, alias) {
+
+	var active_group = getActiveGroup();
+	if (alias in active_group.member_objects_by_alias) {
+		
+		var prof = parseInt($(dropdown).val());
+		active_group.member_objects_by_alias[alias].proficiency = prof;
 		active_group.markDirty();
 	}
 }
@@ -259,8 +278,9 @@ function saveGroup() {
 
 	var new_group = getActiveGroup();
 
-	new_group.is_self_serve = $('#is_self_serve').is(':checked');
 	new_group.is_public = $('#is_public').is(':checked');
+	new_group.is_self_serve = $('#is_self_serve').is(':checked');
+	new_group.is_skill = $('#is_skill').is(':checked');
 
 	// TODO We could check for all dirty groups and implement a "Save All"
 	// command
@@ -273,19 +293,23 @@ function saveGroup() {
 		action : action_type,
 		json : jsonString,
 	}, function(data) {
-
-		new_group.dirty = false;
-
-		if (data.created_new_group) {
-
-			var old_group_id = new_group.id;
-			new_group.id = data.new_group_id;
-			group_objects_by_id[new_group.id] = new_group;
-			new_group.mine = true;
-			delete group_objects_by_id[old_group_id];
+		if (data.success) {
+			
+			new_group.dirty = false;
+	
+			if (data.created_new_group) {
+	
+				var old_group_id = new_group.id;
+				new_group.id = data.new_group_id;
+				group_objects_by_id[new_group.id] = new_group;
+				new_group.mine = true;
+				delete group_objects_by_id[old_group_id];
+			}
+	
+			renderGroups();
+			showGroup(new_group.id);
+		} else {
+			alert("Failed:\n" + data.message);
 		}
-
-		renderGroups();
-		showGroup(new_group.id);
 	});
 }

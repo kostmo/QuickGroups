@@ -123,6 +123,20 @@ public class PostgresData {
 
 		return group_members;
 	}
+	
+	// ========================================================================
+	public static Map<Integer, String> loadProficiencyLabels(Connection con) throws SQLException {
+
+		Map<Integer, String> proficiency_labels = new HashMap<Integer, String>();
+		String query = "SELECT * FROM \"proficiency_levels\"";
+		PreparedStatement query_statement = con.prepareStatement(query);
+		
+		ResultSet rs = query_statement.executeQuery();
+		while (rs.next())
+			proficiency_labels.put(rs.getInt(1), rs.getString(2).trim());
+
+		return proficiency_labels;
+	}
 
 	// ========================================================================
 	public static long copyGroup(Connection con, long source_group_id, String new_group_name, String new_owner) throws SQLException {
@@ -139,7 +153,7 @@ public class PostgresData {
 		} else
 			throw new SQLException("Could not find source group.");
 
-		String group_insertion_query = "INSERT INTO \"groups\" (label, is_public, is_self_serve, owner) (SELECT ?, is_public, is_self_serve, ? FROM groups WHERE id=?)";
+		String group_insertion_query = "INSERT INTO \"groups\" (label, is_public, is_self_serve, is_skill, owner) (SELECT ?, is_public, is_self_serve, is_skill, ? FROM groups WHERE id=?)";
 		PreparedStatement group_insertion_statement = con.prepareStatement(group_insertion_query, Statement.RETURN_GENERATED_KEYS);
 		group_insertion_statement.setString(1, new_group_name);
 		group_insertion_statement.setString(2, new_owner);
@@ -222,16 +236,17 @@ public class PostgresData {
 	// ========================================================================
 	public static long insertNewGroup(Connection con, Group group_object) throws SQLException {
 
-		String group_insertion_query = "INSERT INTO \"groups\" (label, is_public, is_self_serve, owner) VALUES (?, ?, ?, ?)";
+		String group_insertion_query = "INSERT INTO \"groups\" (label, is_public, is_self_serve, is_skill, owner) VALUES (?, ?, ?, ?)";
 		PreparedStatement group_insertion_statement = con.prepareStatement(group_insertion_query, Statement.RETURN_GENERATED_KEYS);
 
-		String member_insertion_query = "INSERT INTO \"membership\" (alias, group_id, set_by) VALUES (?, ?, ?)";
+		String member_insertion_query = "INSERT INTO \"membership\" (alias, group_id, set_by, proficiency) VALUES (?, ?, ?, ?)";
 		PreparedStatement member_insertion_statement = con.prepareStatement(member_insertion_query);
 
 
 		group_insertion_statement.setString(1, group_object.label);
 		group_insertion_statement.setBoolean(2, group_object.is_public );
 		group_insertion_statement.setBoolean(3, group_object.is_self_serve );
+		group_insertion_statement.setBoolean(3, group_object.is_skill );
 		group_insertion_statement.setString(4, group_object.owner);
 
 		long group_id = -2;
@@ -252,13 +267,13 @@ public class PostgresData {
 			member_insertion_statement.setString(1, member.alias);
 			member_insertion_statement.setLong(2, group_id);
 			member_insertion_statement.setString(3, member.set_by);
+			member_insertion_statement.setInt(4, member.proficiency);
 
 			int status2 = member_insertion_statement.executeUpdate();
 		}
 
 		return group_id;
 	}
-
 
 	// ========================================================================
 	public static void deleteTagAssociationsByKey(Connection con, Collection<Long> keys, long group_id) throws SQLException {
@@ -297,7 +312,6 @@ public class PostgresData {
 	
 	// ========================================================================
 	public static void reconcileGroupMembers(Connection con, Group modified_group) throws SQLException {
-		
 
 		Map<String, GroupMember> existing_group_members = loadGroupMembers(con, modified_group.id);
 		
@@ -314,7 +328,7 @@ public class PostgresData {
 		}
 
 		// Add new members
-		String member_insertion_query = "INSERT INTO \"membership\" (alias, group_id, set_by) VALUES (?, ?, ?)";
+		String member_insertion_query = "INSERT INTO \"membership\" (alias, group_id, set_by, proficiency) VALUES (?, ?, ?, ?)";
 		PreparedStatement member_insertion_statement = con.prepareStatement(member_insertion_query);
 		for (GroupMember member : modified_group.group_members) {
 			if (!existing_group_members.keySet().contains(member.alias)) {
@@ -322,9 +336,16 @@ public class PostgresData {
 				member_insertion_statement.setString(1, member.alias);
 				member_insertion_statement.setLong(2, member.group_id);
 				member_insertion_statement.setString(3, member.set_by);
+				member_insertion_statement.setInt(4, member.proficiency);
+				
+				System.out.println(member.alias + " is a new member of group \"" + modified_group.label + "\". Proficiency: " + member.proficiency);
+				
 				int status2 = member_insertion_statement.executeUpdate();
 			}
 		}
+		
+		// Update properties (e.g. "proficiency") of existing members
+		// TODO
 	}
 	
 	// ========================================================================
@@ -340,7 +361,7 @@ public class PostgresData {
 			}
 
 		} else {
-			System.out.println("Could not find group to update in database.");
+			System.err.println("Could not find group to update in database.");
 			return false;
 		}
 
@@ -348,16 +369,16 @@ public class PostgresData {
 		if ( group_in_database.owner.equals(modified_group.owner) ) {
 
 			// Only the owner of the group can update group metadata.
-			String group_update_query = "UPDATE \"groups\" SET label=?, is_public=?, is_self_serve=? WHERE id=?";
+			String group_update_query = "UPDATE \"groups\" SET label=?, is_public=?, is_self_serve=?, is_skill=? WHERE id=?";
 			PreparedStatement group_update_statement = con.prepareStatement(group_update_query);
 
 			group_update_statement.setString(1, modified_group.label);
 			group_update_statement.setBoolean(2, modified_group.is_public );
 			group_update_statement.setBoolean(3, modified_group.is_self_serve );
-			group_update_statement.setLong(4, modified_group.id );
+			group_update_statement.setBoolean(4, modified_group.is_skill );
+			group_update_statement.setLong(5, modified_group.id );
 
 			int status = group_update_statement.executeUpdate();
-
 
 			reconcileGroupMembers(con, modified_group);
 			reconcileGroupTags(con, modified_group);
@@ -368,6 +389,9 @@ public class PostgresData {
 
 			// TODO
 			System.err.println("Not implemented yet.");
+
+		} else {
+			return false;
 		}
 
 		return true;

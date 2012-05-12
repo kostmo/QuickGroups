@@ -14,44 +14,63 @@ import org.json.simple.JSONObject;
 
 
 public class Group implements JsonSerializable {
+	
+
+	public static final String KEY_ID = "id";
+	public static final String KEY_LABEL = "label";
+	public static final String KEY_IS_PUBLIC = "is_public";
+	public static final String KEY_IS_SELF_SERVE = "is_self_serve";
+	public static final String KEY_IS_SKILL = "is_skill";
+	public static final String KEY_OWNER = "owner";
+	public static final String KEY_TAGS = "tags";
+	
 	public final long id;
 	public final String label;
-	public final boolean is_public, is_self_serve;
+	public final boolean is_public, is_self_serve, is_skill;
 	public final String owner;
 	public Date created, modified;
 	public final Set<GroupMember> group_members = new HashSet<GroupMember>();
 	public final Set<String> tags = new HashSet<String>();
 
-	public Group(long id, String label, boolean is_public, boolean is_self_serve, String owner) {
+	public Group(long id, String label, boolean is_public, boolean is_self_serve, boolean is_skill, String owner) {
 		this.id = id;
 		this.label = label;
 		this.is_public = is_public;
 		this.is_self_serve = is_self_serve;
+		this.is_skill = is_skill;
 		this.owner = owner;
 	}
 
 	@SuppressWarnings("unchecked")
 	public static Group newFromJSON(JSONObject json_object, String owner_alias) throws SQLException {
 
-		Group g = new Group(
-				(Long) json_object.get("id"),
-				json_object.get("label").toString(),
-				(Boolean) json_object.get("is_public"),
-				(Boolean) json_object.get("is_self_serve"),
+		Group group = new Group(
+				(Long) json_object.get(KEY_ID),
+				json_object.get(KEY_LABEL).toString(),
+				(Boolean) json_object.get(KEY_IS_PUBLIC),
+				(Boolean) json_object.get(KEY_IS_SELF_SERVE),
+				(Boolean) json_object.get(KEY_IS_SKILL),
 				owner_alias
 			);
 
-		JSONArray tags = (JSONArray) json_object.get("tags");
-		g.tags.addAll(tags);
+		JSONArray tags = (JSONArray) json_object.get(KEY_TAGS);
+		group.tags.addAll(tags);
 		
 		JSONObject members_as_dicts = (JSONObject) json_object.get("members_as_dicts");
 		for (Object item_key : members_as_dicts.keySet()) {
+			
+			JSONObject member_as_dict = (JSONObject) members_as_dicts.get(item_key);
+			
 			String alias = item_key.toString();
-			GroupMember member = new GroupMember(g.id, alias, owner_alias);
-			g.group_members.add(member);
+			GroupMember member = new GroupMember(
+					group.id,
+					alias,
+					owner_alias,
+					Integer.parseInt(member_as_dict.get(GroupMember.KEY_PROFICIENCY).toString()));
+			group.group_members.add(member);
 		}
 		
-		return g;
+		return group;
 	}
 	
 
@@ -65,11 +84,12 @@ public class Group implements JsonSerializable {
 	
 	public static Group newFromResultSet(ResultSet rs) throws SQLException {
 		Group g = new Group(
-				rs.getLong("id"),
-				rs.getString("label").trim(),
-				rs.getBoolean("is_public"),
-				rs.getBoolean("is_self_serve"),
-				rs.getString("owner").trim()
+				rs.getLong(KEY_ID),
+				rs.getString(KEY_LABEL).trim(),
+				rs.getBoolean(KEY_IS_PUBLIC),
+				rs.getBoolean(KEY_IS_SELF_SERVE),
+				rs.getBoolean(KEY_IS_SKILL),
+				rs.getString(KEY_OWNER).trim()
 			);
 		String taglist_string = rs.getString("taglist");
 		if (taglist_string != null)
@@ -81,15 +101,16 @@ public class Group implements JsonSerializable {
 	@Override
 	public JSONObject asJsonObject() {
 		JSONObject json_output_object = new JSONObject();
-		json_output_object.put("id", id);
-		json_output_object.put("label", label);
-		json_output_object.put("is_public", is_public);
-		json_output_object.put("is_self_serve", is_self_serve);
-		json_output_object.put("owner", owner);
+		json_output_object.put(KEY_ID, id);
+		json_output_object.put(KEY_LABEL, label);
+		json_output_object.put(KEY_IS_PUBLIC, is_public);
+		json_output_object.put(KEY_IS_SELF_SERVE, is_self_serve);
+		json_output_object.put(KEY_IS_SKILL, is_skill);
+		json_output_object.put(KEY_OWNER, owner);
 		
 		JSONArray tags_array = new JSONArray();
 		tags_array.addAll(tags);
-		json_output_object.put("tags", tags_array);
+		json_output_object.put(KEY_TAGS, tags_array);
 		
 		JSONObject members_as_dicts = new JSONObject();
 		for (GroupMember member : this.group_members)
@@ -106,6 +127,7 @@ public class Group implements JsonSerializable {
             .append(label)
             .append(is_public)
             .append(is_self_serve)
+            .append(is_skill)
             .append(owner)
             .toHashCode();
     }
@@ -126,6 +148,7 @@ public class Group implements JsonSerializable {
             .append(label, rhs.label)
             .append(is_public, rhs.is_public)
             .append(is_self_serve, rhs.is_self_serve)
+            .append(is_skill, rhs.is_skill)
             .append(owner, rhs.owner)
             .isEquals();
 	}

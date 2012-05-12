@@ -77,8 +77,7 @@ public class LdapSearcherServlet extends HttpServlet {
 
 			String subfilter = "(|" + multi_rule_query +")";
 			SearchResult searchResult = LdapHelper.getGroupFileteredLdapSearchResult(ldap_properties, subfilter);
-
-			System.out.println(searchResult.getEntryCount() + " entries returned.");
+//			System.out.println(searchResult.getEntryCount() + " entries returned.");
 			for (SearchResultEntry e : searchResult.getSearchEntries()) {
 				JSONObject result_entry = new JSONObject();
 				result_entry.put("value", e.getAttributeValue(attributes[0]));

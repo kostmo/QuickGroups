@@ -152,11 +152,6 @@ function toggle_merge_options(link_element) {
 }
 
 //============================================================================
-function toggleAggregateMemberList() {
-	$("#aggregate_member_list").toggle();
-}
-
-//============================================================================
 function renderGroups() {
 
 	var sorted_dictionary_keys = getSortedDictionaryKeys(group_objects_by_id, function(dict, key) {
@@ -165,7 +160,7 @@ function renderGroups() {
 	
 	var filter_criteria_value = $('tag_filter_criteria').val();
 	
-	var shown_groups_aliases = {};
+	var shown_groups_member_objects = {};	// To remove duplicates, simulate a Set by using only the keys of a Hash
 	var group_count = 0;
 	var li_elements = [];
 	$.each(sorted_dictionary_keys, function(key_index, key_value) {
@@ -179,7 +174,7 @@ function renderGroups() {
 
 		// Count unique members in the currently shown groups
 		$.each(group_object.member_objects_by_alias, function(alias, member_object) {
-			shown_groups_aliases[alias] = null;
+			shown_groups_member_objects[alias] = member_object;
 		});
 		
 		li_elements.push( "<li onclick='showGroup(" + group_object.id + ")'>" + group_object.label + " <b>(" + group_object.getMemberCount() + ")</b></li>" );
@@ -187,15 +182,13 @@ function renderGroups() {
 	});
 	
 	var unique_filtered_member_count = 0;
-	var aggregate_member_list = [];
-	$.each(shown_groups_aliases, function(alias, value) {
-		aggregate_member_list.push(alias);
+	var cumulative_member_objects = [];
+	$.each(shown_groups_member_objects, function(alias, member_object) {
+		cumulative_member_objects.push(member_object);
 		unique_filtered_member_count++;
 	});
-	var aggregate_member_holder = $("#aggregate_member_list");
-	aggregate_member_holder.html( aggregate_member_list.join(", ") );
-	
 
+	$( "#filtered_groups_email_url" ).attr("href", getEmailLink(cumulative_member_objects));
 	$( "#group_list_header" ).html( "" + group_count + " Group(s), " + unique_filtered_member_count + " member(s)" );	
 	$( "#group_list" ).html( li_elements.join("") );
 	
@@ -262,6 +255,16 @@ function changeSelfServe(checkbox_element) {
 }
 
 //============================================================================
+function changeIsSkill(checkbox_element) {
+
+	var group_object = getActiveGroup();
+	var is_skill_checked = $( checkbox_element ).is(':checked');
+	group_object.is_skill = is_skill_checked;
+
+	group_object.markDirty();
+}
+
+//============================================================================
 function changeGroupName(new_group_name) {
 	var active_group = getActiveGroup();
 	active_group.label = new_group_name;
@@ -293,7 +296,8 @@ function showGroup(group_id) {
 	$( "#group_label_editbox" ).text(group_object.label);
 	$( "#is_public" ).attr('checked', group_object.is_public);
 	$( "#is_self_serve" ).attr('checked', group_object.is_self_serve);
-
+	$( "#is_skill" ).attr('checked', group_object.is_skill);
+	
 
 	// Render tag list
 	$( "#group_tags_list" ).html(group_object.tags.map(renderTagItem, {editable: group_object.mine, remove_function_name: "removeGroupTag"}).join(", "));
@@ -317,7 +321,6 @@ function showGroup(group_id) {
 			$( "#save_button" ).removeClass( "dirty_save_button" );
 		}
 
-
 	} else
 		$(".modifying_actions").attr("disabled", "disabled");
 	
@@ -327,21 +330,33 @@ function showGroup(group_id) {
 	});
 	
 	var html_string = "";
-	var email_addresses = [];
-	$.each(sorted_dictionary_keys, function(key_index, alias) {
+	var member_object_list = [];
+	$.each(sorted_dictionary_keys, function(index, alias) {
 
 		var member_object = group_object.member_objects_by_alias[alias];
+		member_object_list.push(member_object);
 		
+		// TODO
 //		member_object.modified
 //		member_object.set_by
-		html_string += renderMemberItem(group_object, member_object.alias);
-		email_addresses.push(alias + "@" + company_domain);
+		html_string += renderMemberItem(group_object, member_object);
 	});
 	
 	$( "#member_count" ).html( sorted_dictionary_keys.length + " member(s)." );
 	$( "#group_holder" ).html( html_string );
 
-	$( "#group_email_url" ).attr( "href", "mailto:" + email_addresses.join(";"));
+	$( "#group_email_url" ).attr("href", getEmailLink(member_object_list));
+}
+
+//============================================================================
+function getEmailLink(member_objects) {
+	
+	var email_addresses = [];
+	$.each(member_objects, function(index, member_object) {
+		email_addresses.push(member_object.getEmailAddress());
+	});
+	
+	return "mailto:" + email_addresses.join(";");
 }
 
 //============================================================================
@@ -355,8 +370,11 @@ function renderTagItem(tag) {
 }
 
 //============================================================================
-function renderMemberItem(group, alias) {
-	var remove_command = "";
+function renderMemberItem(group, member_object) {
+	var command_set = [];
+	command_set.push("<a href='mailto:" + member_object.getEmailAddress() + "'><img style='vertical-align: middle' src='images/tiny_envelope.png' title='Email' alt='envelope'></a>");
+	
+	var alias = member_object.alias;
 	
 	var is_me = alias == logged_in_username;
 	var command_text = "Remove";
@@ -364,11 +382,31 @@ function renderMemberItem(group, alias) {
 		command_text = "Remove myself";
 	
 	if (group.mine || (group.is_self_serve && is_me)) {
-		remove_command = " <span class='remove_member' onclick='removeMember(\"" + alias + "\");'>[<img style='vertical-align: middle' src='images/tiny_trashcan.png' title='" + command_text + "' alt='trash can'>]</span>";
+		command_set.push("<span class='remove_member' onclick='removeMember(\"" + alias + "\");'><img style='vertical-align: middle' src='images/tiny_trashcan.png' title='" + command_text + "' alt='trash can'></span>");
 	}
 	
+	if (group.is_skill) {
+		
+		var skill_display = "Rating: ";
+		
+		if (group.mine || (group.is_self_serve && is_me)) {
+			
+			skill_display += "<select onchange='updateRating(this, \"" + member_object.alias + "\")'>";
+			$.each(proficiency_labels, function(rating, label) {
+				skill_display += "<option value='" + rating + "'" + (rating == member_object.proficiency? " selected='selected'" : "") + ">" + label + "</option>";
+			});
+			skill_display += "</select>";
+
+		} else {
+			skill_display += proficiency_labels[member_object.proficiency]; 
+		}
+		
+		command_set.push(skill_display);
+	}
+	
+	
 	var full_name = fullname_cache[alias];
-	return "<li><span style='font-weight: bold'>" + full_name + "</span> (<span style='color: #008000'>" + alias + "</span>)" + remove_command +"</li>";
+	return "<li><span style='font-weight: bold'>" + full_name + "</span> (<span style='color: #008000'>" + alias + "</span>) [" + command_set.join(", ") +"]</li>";
 }
 
 //============================================================================

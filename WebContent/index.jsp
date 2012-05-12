@@ -69,8 +69,8 @@ var company_domain = "${company_domain}";
 					<a id="query_url" href="blah">Machine query link</a>
 				</fieldset>
 				<br/>
-				<button onclick="toggleAggregateMemberList(this)">See members of visible groups</button>
-				<div id="aggregate_member_list" style="max-width: 300px; display: none;"></div>
+				
+				<a id="filtered_groups_email_url" href="mailto:">Send email to everyone in filtered groups</a>
 			</td>
 			<td style="min-width: 250px">
 
@@ -132,6 +132,10 @@ var company_domain = "${company_domain}";
 											type='checkbox' /></td>
 										<td><label for="is_self_serve" title="People can add and remove themselves"> Self-serve
 												membership</label></td>
+									<td><input class="modifying_actions"
+											onchange="changeIsSkill(this);" id='is_skill'
+											type='checkbox' /></td>
+										<td><label for="is_skill" title="This group is about a skill"> Skill</label></td>
 									</tr>
 
 								</table>

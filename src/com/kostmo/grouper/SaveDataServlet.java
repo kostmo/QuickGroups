@@ -75,6 +75,8 @@ public class SaveDataServlet extends HttpServlet {
 		
 
 		JSONObject json_output_object = new JSONObject();
+		json_output_object.put("success", false);
+		
 		try {
 			Connection postgres_connection = PostgresData.getPostgresConnection(this);
 
@@ -84,14 +86,14 @@ public class SaveDataServlet extends HttpServlet {
 			json_output_object.put("new_group_id", new_group_id);
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			json_output_object.put("message", e.getMessage());
 		} catch (MisconfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			json_output_object.put("message", e.getMessage());
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			json_output_object.put("message", e.getMessage());
 		}
 
 		return json_output_object;
@@ -159,6 +161,7 @@ public class SaveDataServlet extends HttpServlet {
 	}
 
 	// ========================================================================
+	@SuppressWarnings("unchecked")
 	private JSONObject insertAction(HttpServletRequest request) {
 
 		String json_input_string = request.getParameter("json");
@@ -204,6 +207,7 @@ public class SaveDataServlet extends HttpServlet {
 	}
 
 	// ========================================================================
+	@SuppressWarnings("unchecked")
 	private JSONObject modifyAction(HttpServletRequest request) {
 
 		String json_input_string = request.getParameter("json");
@@ -216,7 +220,8 @@ public class SaveDataServlet extends HttpServlet {
 		}
 		int entry_set_size = json_input_object.entrySet().size();
 
-
+		
+		JSONObject json_output_object = new JSONObject();
 		try {
 			Connection postgres_connection = PostgresData.getPostgresConnection(this);
 			
@@ -225,23 +230,21 @@ public class SaveDataServlet extends HttpServlet {
 				JSONObject group_json_object = (JSONObject) json_input_object.get(entry);
 				PostgresData.updateGroup(postgres_connection, Group.newFromJSON(group_json_object, request.getRemoteUser()));
 			}
+			
+			json_output_object.put("success", new Boolean(true));
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			json_output_object.put("message", e.getMessage());
 		} catch (MisconfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			json_output_object.put("message", e.getMessage());
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			json_output_object.put("message", e.getMessage());
 		}
-
 		
-		JSONObject json_output_object = new JSONObject();
-		json_output_object.put("success", new Boolean(true));
 		json_output_object.put("count", new Integer(entry_set_size));
-		
 		return json_output_object;
 	}
 

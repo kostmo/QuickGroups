@@ -6,9 +6,9 @@ function Group(label) {
 	this.tags = [];
 	this.mine = true;
 	
-	
 	this.is_self_serve = false;
 	this.is_public = true;
+	this.is_skill = false;
 	
 	this.containsAlias = function(alias) {
 		return this.aliases.indexOf(alias) != -1;
@@ -33,8 +33,9 @@ function Group(label) {
 		
 		var dict = {
 				"label": this.label,
-				"is_self_serve": this.is_self_serve,
 				"is_public": this.is_public,
+				"is_self_serve": this.is_self_serve,
+				"is_skill": this.is_skill,
 				"id": this.id,
 				"tags": this.tags,
 				"members_as_dicts": members_as_dicts,
@@ -63,6 +64,7 @@ function GroupMember(alias) {
 	this.alias = alias;
 	this.set_by = null;
 	this.modified = null;
+	this.proficiency = 0;
 	
 	this.getName = function() {
 		if (this.alias in fullname_cache) {
@@ -81,7 +83,12 @@ function GroupMember(alias) {
 				"alias": this.alias,
 				"set_by": this.set_by,
 				"modified": this.modified,
+				"proficiency": this.proficiency
 		};
 		return dict;
+	};
+	
+	this.getEmailAddress = function() {
+		return alias + "@" + company_domain;
 	};
 }

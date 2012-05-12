@@ -36,8 +36,6 @@ public class LoadDataServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request,
 		HttpServletResponse response) throws ServletException, IOException {
 
-
-
 		String action = request.getParameter("action");
 		
 
@@ -88,6 +86,10 @@ public class LoadDataServlet extends HttpServlet {
 				}
 				
 
+//				JSONObject proficiency_labels_json_object = new JSONObject();
+//				proficiency_labels_json_object.put(0, value);
+				json_output_object.put("proficiency_labels", PostgresData.loadProficiencyLabels(postgres_connection));
+				
 				json_output_object.put("success", true);
 				
 			} catch (SQLException e) {
@@ -103,6 +105,8 @@ public class LoadDataServlet extends HttpServlet {
 		}
 
 		json_output_object.put("groups", json_group_array);
+		
+		
 
 		StringWriter json_out = new StringWriter();
 		json_output_object.writeJSONString(json_out);
