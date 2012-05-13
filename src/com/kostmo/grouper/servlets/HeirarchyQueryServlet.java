@@ -1,4 +1,4 @@
-package com.kostmo.grouper;
+package com.kostmo.grouper.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
 
+import com.kostmo.grouper.LdapHelper;
 import com.kostmo.grouper.LdapHelper.MisconfigurationException;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.SearchResult;

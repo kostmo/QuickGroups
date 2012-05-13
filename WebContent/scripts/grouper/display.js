@@ -157,20 +157,38 @@ function toggle_merge_options(link_element) {
 }
 
 //============================================================================
-function renderGroups() {
-
+function getSortedGroupKeys() {
 
 	var group_sort_value = $('input:radio[name=group_sort_radio_group]:checked').val();
-	var sorted_dictionary_keys = getSortedDictionaryKeys(group_objects_by_id, function(dict, key) {
+
+	var alphabetical_sorting_function = function(dict, key) {
 		var group_object = dict[key];
-		if (group_sort_value == "alphabetical") {
-			return group_object.label.toLowerCase();
-		} else if (group_sort_value == "member_count") {
-			return -group_object.getMemberCount();
-		}
-	});
+		return group_object.label.toLowerCase();
+	};
 	
+	var member_count_sorting_function = function(dict, key) {
+		var group_object = dict[key];
+		return -group_object.getMemberCount();
+	};
 	
+	var ordered_sorting_functions = [];
+	if (group_sort_value == "alphabetical") {
+		ordered_sorting_functions.push(alphabetical_sorting_function);
+		ordered_sorting_functions.push(member_count_sorting_function);
+	} else if (group_sort_value == "member_count") {
+		ordered_sorting_functions.push(member_count_sorting_function);
+		ordered_sorting_functions.push(alphabetical_sorting_function);
+	}
+	
+	var sorted_dictionary_keys = getSortedDictionaryKeys(group_objects_by_id, ordered_sorting_functions);
+	return sorted_dictionary_keys;
+}
+
+//============================================================================
+function renderGroups() {
+
+	var sorted_dictionary_keys = getSortedGroupKeys();
+
 	var filter_criteria_value = $('#tag_filter_criteria').val();
 	
 	var shown_groups_member_objects = {};	// To remove duplicates, simulate a Set by using only the keys of a Hash
@@ -216,7 +234,7 @@ function renderGroups() {
 	});
 
 	$( "#filtered_groups_email_url" ).attr("href", getEmailLink(cumulative_member_objects, filter_tags.join(", ")));
-	$( "#group_list_header" ).html( "" + group_count + " Group(s), " + unique_filtered_member_count + " member(s)" );	
+	$( "#group_list_header" ).html( "" + group_count + " group(s), " + unique_filtered_member_count + " people" );	
 	$( "#group_list" ).html( li_elements.join("") );
 	
 	if (!group_count) {
@@ -232,26 +250,29 @@ function renderGroups() {
 	}
 }
 
+//============================================================================
 function renderGroupListItem(group_object, interpolation_fraction) {
 	var interpolated_color = getInterpolatedCssColor(interpolation_fraction);
-	return "<li style='background-color: " + interpolated_color + ";' onclick='showGroup(" + group_object.id + ")'>" + group_object.label + " <b>(" + group_object.getMemberCount() + ")</b></li>";
+//	var style = " style='background-color: " + interpolated_color + ";'";	// TODO Use this rainbow coloring somewhere
+	var style = "";
+	return "<li title='id: " + group_object.id + "' " + style + " onclick='showGroup(" + group_object.id + ")'>" + group_object.label + " <b>(" + group_object.getMemberCount() + ")</b></li>";
 }
 
 //============================================================================
-function getExportDownloadURl(format) {
+function getExportDownloadURL(format) {
 	return "load?format=" + format + "&action=exportAll";
 }
 
 //============================================================================
 function exportAllGroups(groups) {
 	var radio_value = $('input:radio[name=export_radio_group]:checked').val();
-	document.location = getExportDownloadURl(radio_value);
+	document.location = getExportDownloadURL(radio_value);
 }
 
 //============================================================================
 function changeExportType(radio_button) {
 	var radio_button_value = $(radio_button).val();
-	$( "#query_url" ).attr( "href", getExportDownloadURl(radio_button_value) );
+	$( "#query_url" ).attr( "href", getExportDownloadURL(radio_button_value) );
 	$( "#query_url" ).text( radio_button_value + " query link");
 }
 
@@ -274,7 +295,6 @@ function changeSelfServe(checkbox_element) {
 	var group_object = getActiveGroup();
 	var is_self_serve_checked = $( checkbox_element ).is(':checked');
 	group_object.is_self_serve = is_self_serve_checked;
-
 	group_object.markDirty();
 }
 
@@ -284,7 +304,6 @@ function changeIsSkill(checkbox_element) {
 	var group_object = getActiveGroup();
 	var is_skill_checked = $( checkbox_element ).is(':checked');
 	group_object.is_skill = is_skill_checked;
-
 	group_object.markDirty();
 }
 
@@ -311,6 +330,45 @@ function updateGroupFilter() {
 }
 
 //============================================================================
+function getSortedGroupMemberKeys(group_object) {
+
+	var member_sort_value = $('input:radio[name=members_sort_radio_group]:checked').val();
+	
+	var alphabetical_sorting_function = function(dict, key) {
+		return fullname_cache[key].toLowerCase();
+	};
+	
+	var proficiency_sorting_function = function(dict, key) {
+		var member_object = dict[key];
+		return -member_object.proficiency;
+	};
+	
+	var ordered_sorting_functions = [];
+	if (!group_object.is_skill || member_sort_value == "alphabetical") {
+		ordered_sorting_functions.push(alphabetical_sorting_function);
+		ordered_sorting_functions.push(proficiency_sorting_function);
+	} else if (member_sort_value == "proficiency") {
+		ordered_sorting_functions.push(proficiency_sorting_function);
+		ordered_sorting_functions.push(alphabetical_sorting_function);
+	}
+	
+	var sorted_dictionary_keys = getSortedDictionaryKeys(group_object.member_objects_by_alias, ordered_sorting_functions);
+	return sorted_dictionary_keys;
+}
+
+//============================================================================
+function renderSingleGroupTagsList(group_object) {
+
+	var html_contents = "&lt;<i>no tags selected</i>&gt;";
+	if (group_object.tags.length) {
+		html_contents = group_object.tags.map(renderTagItem, {editable: group_object.mine, remove_function_name: "removeGroupTag"}).join(", ");
+	}
+	$( "#group_tags_list" ).html(html_contents);
+}
+
+
+
+//============================================================================
 function showGroup(group_id) {
 
 	if (group_id == null) {
@@ -319,6 +377,7 @@ function showGroup(group_id) {
 	} else {
 		$( ".group_info_display" ).show();
 	}
+
 	
 	active_group_id = group_id;
 	
@@ -327,11 +386,16 @@ function showGroup(group_id) {
 	$( "#is_public" ).attr('checked', group_object.is_public);
 	$( "#is_self_serve" ).attr('checked', group_object.is_self_serve);
 	$( "#is_skill" ).attr('checked', group_object.is_skill);
+
+	if (!group_object.is_skill) {
+		$( "#member_sort_criteria_wiget" ).hide();
+	} else {
+		$( "#member_sort_criteria_wiget" ).show();
+	}
 	
 
-	// Render tag list
-	$( "#group_tags_list" ).html(group_object.tags.map(renderTagItem, {editable: group_object.mine, remove_function_name: "removeGroupTag"}).join(", "));
-	
+	renderSingleGroupTagsList(group_object);
+
 	if (group_object.mine || group_object.is_self_serve) {
 		
 		$(".modifying_actions").removeAttr('disabled');
@@ -353,11 +417,9 @@ function showGroup(group_id) {
 
 	} else
 		$(".modifying_actions").attr("disabled", "disabled");
-	
-	var sorted_dictionary_keys = getSortedDictionaryKeys(group_object.member_objects_by_alias, function(dict, key) {
-		return fullname_cache[key].toLowerCase();
-	});
-	
+
+	var sorted_dictionary_keys = getSortedGroupMemberKeys(group_object);
+
 	var html_string = "";
 	var member_object_list = [];
 	$.each(sorted_dictionary_keys, function(index, alias) {
@@ -420,18 +482,18 @@ function renderMemberItem(group, member_object) {
 	
 	if (group.is_skill) {
 		
-		var skill_display = "Rating: ";
+		var skill_display = "";
 		
 		if (group.mine || (group.is_self_serve && is_me)) {
 			
-			skill_display += "<select onchange='updateRating(this, \"" + member_object.alias + "\")'>";
-			$.each(proficiency_labels, function(rating, label) {
-				skill_display += "<option value='" + rating + "'" + (rating == member_object.proficiency? " selected='selected'" : "") + ">" + label + "</option>";
+			skill_display += "<select title='Proficiency' onchange='updateRating(this, \"" + member_object.alias + "\")'>";
+			$.each(proficiency_labels, function(rating, text_fields) {
+				skill_display += "<option value='" + rating + "'" + (rating == member_object.proficiency ? " selected='selected'" : "") + ">" + text_fields["name"] + "</option>";
 			});
 			skill_display += "</select>";
 
 		} else {
-			skill_display += proficiency_labels[member_object.proficiency]; 
+			skill_display += proficiency_labels[member_object.proficiency]["name"]; 
 		}
 		
 		command_set.push(skill_display);
@@ -442,7 +504,7 @@ function renderMemberItem(group, member_object) {
 //	member_object.set_by
 	
 	var full_name = fullname_cache[alias];
-	return "<li>" + email_icon + " <span style='font-weight: bold' title='" + alias + "'>" + full_name + "</span> [" + command_set.join(", ") +"]</li>";
+	return "<li>" + email_icon + " <span style='font-weight: bold' title='" + alias + "'>" + full_name + "</span> " + command_set.join(" ") +"</li>";
 }
 
 //============================================================================

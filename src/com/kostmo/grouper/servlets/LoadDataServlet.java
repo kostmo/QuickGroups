@@ -1,4 +1,4 @@
-package com.kostmo.grouper;
+package com.kostmo.grouper.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;

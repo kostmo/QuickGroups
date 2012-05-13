@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,6 +17,7 @@ import java.util.Properties;
 
 import javax.servlet.http.HttpServlet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 
 import com.kostmo.grouper.LdapHelper.MisconfigurationException;
@@ -35,12 +37,29 @@ public class PostgresData {
 		Class.forName("org.postgresql.Driver");
 		return DriverManager.getConnection(postgres_properties.getProperty("jdbc_url"), postgres_properties);
 	}
+	
+	// ========================================================================
+	public static Collection<Tag> getFullTagsHistogram(Connection con, boolean include_unused) throws SQLException {
 
+		Collection<Tag> tags = new ArrayList<Tag>();
+		
+		String where_clause = !include_unused ? "WHERE count > 0" : "";
+		String query = "SELECT label, count FROM \"ViewTagHistogram\" " + where_clause + " ORDER BY count DESC, label ASC";
+		PreparedStatement query_statement = con.prepareStatement(query);
+
+		ResultSet rs = query_statement.executeQuery();
+		while (rs.next())
+			tags.add( new Tag(rs.getString(1), rs.getInt(2)) );
+		query_statement.close();
+
+		return tags;
+	}
+	
 	// ========================================================================
 	@SuppressWarnings("unchecked")
 	public static JSONArray searchTags(Connection con, String prefix) throws SQLException {
 
-		String query = "SELECT label FROM \"ViewTagHistogram\" WHERE label LIKE ? AND count > 0 ORDER BY count DESC";
+		String query = "SELECT label FROM \"ViewTagHistogram\" WHERE label LIKE ? AND count > 0 ORDER BY count DESC, label ASC";
 		PreparedStatement query_statement = con.prepareStatement(query);
 		
 		// Escape percents and underscores
@@ -70,6 +89,26 @@ public class PostgresData {
 			return Group.newFromResultSet(rs);
 
 		return null;
+	}
+
+	// ========================================================================
+	public static Group loadSingleGroup(Connection con, String username, long group_id) throws SQLException {
+
+		String query = "SELECT * FROM \"ViewGroupsWithAggregateInfo\" WHERE (owner=? OR is_public) AND id=?";
+		PreparedStatement query_statement = con.prepareStatement(query);
+		query_statement.setString(1, username);
+		query_statement.setLong(2, group_id);
+		
+		Group group = null;
+		
+		ResultSet rs = query_statement.executeQuery();
+		if (rs.next()) {
+			group = Group.newFromResultSet(rs);
+		}
+
+		query_statement.close();
+
+		return group;
 	}
 	
 	// ========================================================================
@@ -124,16 +163,25 @@ public class PostgresData {
 		return group_members;
 	}
 	
+	
+	static final String[] PROFICIENCY_FIELD_NAMES = new String[] {"name", "description", "alternate_description"};
 	// ========================================================================
-	public static Map<Integer, String> loadProficiencyLabels(Connection con) throws SQLException {
+	public static Map<Integer, Map<String, String>> loadProficiencyLabels(Connection con) throws SQLException {
 
-		Map<Integer, String> proficiency_labels = new HashMap<Integer, String>();
-		String query = "SELECT * FROM \"proficiency_levels\"";
+		Map<Integer, Map<String, String>> proficiency_labels = new HashMap<Integer, Map<String, String>>();
+		String query = "SELECT rating," + StringUtils.join(PROFICIENCY_FIELD_NAMES, ",") + " FROM \"proficiency_levels\"";
 		PreparedStatement query_statement = con.prepareStatement(query);
-		
 		ResultSet rs = query_statement.executeQuery();
-		while (rs.next())
-			proficiency_labels.put(rs.getInt(1), rs.getString(2).trim());
+		while (rs.next()) {
+			Map<String, String> text_map = new HashMap<String, String>();
+			for (String field_name : PROFICIENCY_FIELD_NAMES) {
+				String field_value = rs.getString(field_name);
+				if (field_value != null)
+					text_map.put(field_name, field_value.trim());
+			}
+			
+			proficiency_labels.put(rs.getInt(1), text_map);
+		}
 
 		return proficiency_labels;
 	}
@@ -236,7 +284,7 @@ public class PostgresData {
 	// ========================================================================
 	public static long insertNewGroup(Connection con, Group group_object) throws SQLException {
 
-		String group_insertion_query = "INSERT INTO \"groups\" (label, is_public, is_self_serve, is_skill, owner) VALUES (?, ?, ?, ?)";
+		String group_insertion_query = "INSERT INTO \"groups\" (label, is_public, is_self_serve, is_skill, owner) VALUES (?, ?, ?, ?, ?)";
 		PreparedStatement group_insertion_statement = con.prepareStatement(group_insertion_query, Statement.RETURN_GENERATED_KEYS);
 
 		String member_insertion_query = "INSERT INTO \"membership\" (alias, group_id, set_by, proficiency) VALUES (?, ?, ?, ?)";
@@ -246,8 +294,8 @@ public class PostgresData {
 		group_insertion_statement.setString(1, group_object.label);
 		group_insertion_statement.setBoolean(2, group_object.is_public );
 		group_insertion_statement.setBoolean(3, group_object.is_self_serve );
-		group_insertion_statement.setBoolean(3, group_object.is_skill );
-		group_insertion_statement.setString(4, group_object.owner);
+		group_insertion_statement.setBoolean(4, group_object.is_skill );
+		group_insertion_statement.setString(5, group_object.owner);
 
 		long group_id = -2;
 
@@ -330,6 +378,12 @@ public class PostgresData {
 		// Add new members
 		String member_insertion_query = "INSERT INTO \"membership\" (alias, group_id, set_by, proficiency) VALUES (?, ?, ?, ?)";
 		PreparedStatement member_insertion_statement = con.prepareStatement(member_insertion_query);
+		
+
+		// Update properties (e.g. "proficiency") of existing members
+		String member_update_query = "UPDATE \"membership\" SET proficiency=? WHERE alias=? AND group_id=?";
+		PreparedStatement member_update_statement = con.prepareStatement(member_update_query);
+		
 		for (GroupMember member : modified_group.group_members) {
 			if (!existing_group_members.keySet().contains(member.alias)) {
 
@@ -341,11 +395,16 @@ public class PostgresData {
 				System.out.println(member.alias + " is a new member of group \"" + modified_group.label + "\". Proficiency: " + member.proficiency);
 				
 				int status2 = member_insertion_statement.executeUpdate();
+				
+			} else {
+
+				member_update_statement.setInt(1, member.proficiency);
+				member_update_statement.setString(2, member.alias);
+				member_update_statement.setLong(3, member.group_id);
+				
+				int status2 = member_update_statement.executeUpdate();
 			}
 		}
-		
-		// Update properties (e.g. "proficiency") of existing members
-		// TODO
 	}
 	
 	// ========================================================================

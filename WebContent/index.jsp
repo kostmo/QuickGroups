@@ -94,6 +94,9 @@ var company_domain = "${company_domain}";
 						<span id='group_label_editbox'>Group Title</span> <img
 							src="images/tiny_pencil.png" />
 					</h2>
+					
+					<p><a id="group_email_url" href="mailto:">Start a discussion
+						with the people in this group</a></p>
 
 					<fieldset>
 						<legend>Group properties</legend>
@@ -129,7 +132,7 @@ var company_domain = "${company_domain}";
 								class="modifying_actions" id='group_tag_input' /> <img
 								style='display: none; vertical-align: middle;'
 								id='group_tag_hourglass_img'
-								src='images/square-ajax-loader.gif' />
+								src='images/square-ajax-loader.gif' /> <a href="taglist">All tags</a>
 						</div>
 					</fieldset>
 
@@ -174,8 +177,6 @@ var company_domain = "${company_domain}";
 							<button onclick='exportGroup(active_group_id);'>Export</button>
 						</div>
 
-						<a id="group_email_url" href="mailto:">Start a discussion
-							with the people in this group</a>
 					</fieldset>
 
 				</div>
@@ -222,7 +223,17 @@ var company_domain = "${company_domain}";
 					</div>
 					
 					<div id="current_members_box">
-						<span id="member_count">0 member(s).</span>
+					
+					<span id="member_sort_criteria_wiget">
+						Sort by: <label><input type="radio"
+						onchange="showGroup(active_group_id);" name="members_sort_radio_group"
+						value="proficiency" />Proficiency</label> <label><input
+						type="radio" onchange="showGroup(active_group_id);"
+						name="members_sort_radio_group" value="alphabetical"
+						checked="checked" />Alphabetical</label>
+					</span>
+					
+						<p><span id="member_count">0 member(s).</span></p>
 						<ul id="members_holder"></ul>
 					</div>
 

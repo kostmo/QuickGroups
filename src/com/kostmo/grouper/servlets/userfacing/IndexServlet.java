@@ -1,4 +1,4 @@
-package com.kostmo.grouper;
+package com.kostmo.grouper.servlets.userfacing;
 
 import java.io.IOException;
 
@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.kostmo.grouper.LdapHelper;
 import com.kostmo.grouper.LdapHelper.MisconfigurationException;
 
 @WebServlet("/index")

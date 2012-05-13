@@ -1,9 +1,9 @@
-package com.kostmo.grouper;
+package com.kostmo.grouper.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -14,17 +14,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
-import com.kostmo.grouper.LdapHelper.MisconfigurationException;
+import com.kostmo.grouper.LdapHelper;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;
 
-@WebServlet("/lookup")
-public class NameLookupServlet extends HttpServlet {
+@WebServlet("/search")
+public class LdapSearcherServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	@Override
@@ -44,35 +45,54 @@ public class NameLookupServlet extends HttpServlet {
 		}
 	}
 
+	
 	@SuppressWarnings("unchecked")
 	void writeGrouperPage(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
+		
 		Properties ldap_properties = LdapHelper.getLdapProperties(this);
-		final String[] attributes = LdapHelper.getLdapAttributes(ldap_properties);	
+		String[] attributes = LdapHelper.getLdapAttributes(ldap_properties);	
+		
+		final String partial_name = request.getParameter("term");
+		String field = request.getParameter("field");
 
-		Collection<String> aliases = Arrays.asList( request.getParameter("aliases").split(",") );
-		String multi_name_query = StringUtils.join(Collections2.transform(aliases, new Function<String, String>() {
+		Collection<String> rules = new ArrayList<String>();
+		if ("alias".equals(field) || "both".equals(field))
+			rules.add(attributes[0]);
+		if ("name".equals(field) || "both".equals(field))
+			rules.add(attributes[1]);
+		
+		
+		
+		String multi_rule_query = StringUtils.join(Collections2.transform(rules, new Function<String, String>() {
 			@Override
-			public String apply(String alias) {
-				return "(" + attributes[0] + "=" + alias + ")";
+			public String apply(String rule) {
+				return "(" + rule + "=" + partial_name + "*)";
 			}
 		}), "");
 
-		JSONObject names = new JSONObject();
+		
+		
+		
+		JSONArray names = new JSONArray();
 		try {
 
-			String ad_query_filter = "(|" + multi_name_query + ")";
-			SearchResult searchResult = LdapHelper.getGroupFileteredLdapSearchResult(ldap_properties, ad_query_filter);
-			for (SearchResultEntry e : searchResult.getSearchEntries())
-				names.put(e.getAttributeValue(attributes[0]), e.getAttributeValue(attributes[1]));
+			String subfilter = "(|" + multi_rule_query +")";
+			SearchResult searchResult = LdapHelper.getGroupFileteredLdapSearchResult(ldap_properties, subfilter);
+//			System.out.println(searchResult.getEntryCount() + " entries returned.");
+			for (SearchResultEntry e : searchResult.getSearchEntries()) {
+				JSONObject result_entry = new JSONObject();
+				result_entry.put("value", e.getAttributeValue(attributes[0]));
+				result_entry.put("label", e.getAttributeValue(attributes[1]));
+				names.add(result_entry);
+			}
 
 		} catch (LDAPException e) {
 			e.printStackTrace();
 		}
 
+
 		StringWriter json_out = new StringWriter();
 		names.writeJSONString(json_out);
-
 
 		PrintWriter out = response.getWriter();
 		out.append( json_out.toString() );

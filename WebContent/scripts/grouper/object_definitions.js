@@ -7,8 +7,8 @@ function Group(label) {
 	this.mine = true;
 	this.owner = null;
 	
-	this.is_self_serve = false;
 	this.is_public = true;
+	this.is_self_serve = true;	// By default, newly created groups will be self-serve
 	this.is_skill = false;
 	
 	this.containsAlias = function(alias) {

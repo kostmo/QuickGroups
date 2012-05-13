@@ -1,4 +1,4 @@
-package com.kostmo.grouper;
+package com.kostmo.grouper.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -116,14 +116,14 @@ public class SaveDataServlet extends HttpServlet {
 			json_output_object.put("success", true);
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			json_output_object.put("message", e.getMessage());
 		} catch (MisconfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			json_output_object.put("message", e.getMessage());
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			json_output_object.put("message", e.getMessage());
 		}
 
 		return json_output_object;
@@ -147,14 +147,14 @@ public class SaveDataServlet extends HttpServlet {
 			json_output_object.put("success", true);
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			json_output_object.put("message", e.getMessage());
 		} catch (MisconfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			json_output_object.put("message", e.getMessage());
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			json_output_object.put("message", e.getMessage());
 		}
 
 		return json_output_object;
@@ -193,14 +193,14 @@ public class SaveDataServlet extends HttpServlet {
 			json_output_object.put("count", entry_set_size);
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			json_output_object.put("message", e.getMessage());
 		} catch (MisconfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			json_output_object.put("message", e.getMessage());
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			json_output_object.put("message", e.getMessage());
 		}
 
 		return json_output_object;

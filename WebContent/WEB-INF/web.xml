@@ -11,6 +11,7 @@
 		<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>
 
+	
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>Entire Application</web-resource-name>
@@ -22,6 +23,16 @@
 		</auth-constraint>
 	</security-constraint>
 
+
+	<!-- Open up a URL for machine queries -->
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Open Access</web-resource-name>
+			<url-pattern>/api/*</url-pattern>
+		</web-resource-collection>
+	</security-constraint>
+
+	
 	<login-config>
 		<auth-method>BASIC</auth-method>
 		<realm-name>QuickGroups</realm-name>
