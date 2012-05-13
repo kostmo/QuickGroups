@@ -79,6 +79,7 @@ $(function() {
 		$(this).select();
 	});
 
+	renderGroupFilter();
 	
 	reloadGroupData(function(dummy_arg) {
 		renderGroups();
@@ -86,10 +87,9 @@ $(function() {
 });
 
 //============================================================================
-function changeGroupSort(radio_button) {
-//	alert($(radio_button).val());
-	
-	renderGroups();
+function getInterpolatedCssColor(fraction) {
+	var red_green_span = fraction * 1/3;
+	return Color.hsl(red_green_span, 0.9, 0.7).hexTriplet();
 }
 
 //============================================================================
@@ -175,24 +175,38 @@ function renderGroups() {
 	
 	var shown_groups_member_objects = {};	// To remove duplicates, simulate a Set by using only the keys of a Hash
 	var group_count = 0;
-	var li_elements = [];
+
+	
+	
+	var filtered_group_objects = [];
+
 	$.each(sorted_dictionary_keys, function(key_index, key_value) {
 
+		
 		var group_object = group_objects_by_id[key_value];
 		
 		var filter_function = filter_criteria_value == "all" ? Array.prototype.every : Array.prototype.some;
 		if (filter_tags.length > 0)
 			if (!filter_function.call(filter_tags, function(tag) {return group_object.tags.indexOf(tag) >= 0;}))
 				return;
+				
 
-		// Count unique members in the currently shown groups
+		// Gather unique members in the currently shown groups
 		$.each(group_object.member_objects_by_alias, function(alias, member_object) {
 			shown_groups_member_objects[alias] = member_object;
 		});
 		
-		li_elements.push( "<li onclick='showGroup(" + group_object.id + ")'>" + group_object.label + " <b>(" + group_object.getMemberCount() + ")</b></li>" );
+		filtered_group_objects.push(group_object);
 		group_count++;
 	});
+	
+	
+	var li_elements = [];
+	$.each(filtered_group_objects, function(key_index, group_object) {
+		var interpolation_fraction = 1.0*key_index/group_count;
+		li_elements.push( renderGroupListItem(group_object, interpolation_fraction) );
+	});
+	
 	
 	var unique_filtered_member_count = 0;
 	var cumulative_member_objects = [];
@@ -216,6 +230,11 @@ function renderGroups() {
 			$( "#instructions_no_groups" ).hide();
 		}
 	}
+}
+
+function renderGroupListItem(group_object, interpolation_fraction) {
+	var interpolated_color = getInterpolatedCssColor(interpolation_fraction);
+	return "<li style='background-color: " + interpolated_color + ";' onclick='showGroup(" + group_object.id + ")'>" + group_object.label + " <b>(" + group_object.getMemberCount() + ")</b></li>";
 }
 
 //============================================================================
@@ -277,11 +296,17 @@ function changeGroupName(new_group_name) {
 }
 
 //============================================================================
-function updateGroupFilter() {
-
-	var html_contents = filter_tags.map(renderTagItem, {editable: true, remove_function_name: "removeFilterTag"}).join(", ");
-
+function renderGroupFilter() {
+	var html_contents = "&lt;<i>no tags selected</i>&gt;";
+	if (filter_tags.length) {
+		html_contents = filter_tags.map(renderTagItem, {editable: true, remove_function_name: "removeFilterTag"}).join(", ");
+	}
 	$( "#filter_tags_list" ).html(html_contents);
+}
+
+//============================================================================
+function updateGroupFilter() {
+	renderGroupFilter();
 	renderGroups();
 }
 
@@ -289,10 +314,10 @@ function updateGroupFilter() {
 function showGroup(group_id) {
 
 	if (group_id == null) {
-		$( "#group_info_display" ).hide();
+		$( ".group_info_display" ).hide();
 		return;
 	} else {
-		$( "#group_info_display" ).show();
+		$( ".group_info_display" ).show();
 	}
 	
 	active_group_id = group_id;
@@ -329,7 +354,6 @@ function showGroup(group_id) {
 	} else
 		$(".modifying_actions").attr("disabled", "disabled");
 	
-	
 	var sorted_dictionary_keys = getSortedDictionaryKeys(group_object.member_objects_by_alias, function(dict, key) {
 		return fullname_cache[key].toLowerCase();
 	});
@@ -341,14 +365,13 @@ function showGroup(group_id) {
 		var member_object = group_object.member_objects_by_alias[alias];
 		member_object_list.push(member_object);
 		
-		// TODO
-//		member_object.modified
-//		member_object.set_by
 		html_string += renderMemberItem(group_object, member_object);
 	});
 	
 	$( "#member_count" ).html( sorted_dictionary_keys.length + " member(s)." );
-	$( "#group_holder" ).html( html_string );
+	$( "#members_holder" ).html( html_string );
+	
+	$( "#current_group_maintainer" ).text( fullname_cache[group_object.owner] );
 
 	$( "#group_email_url" ).attr("href", getEmailLink(member_object_list, group_object.label));
 }
@@ -381,7 +404,8 @@ function renderTagItem(tag) {
 //============================================================================
 function renderMemberItem(group, member_object) {
 	var command_set = [];
-	command_set.push("<a href='mailto:" + member_object.getEmailAddress() + "'><img style='vertical-align: middle' src='images/tiny_envelope.png' title='Email' alt='envelope'></a>");
+	
+	var email_icon = "<a href='mailto:" + member_object.getEmailAddress() + "'><img style='vertical-align: middle' src='images/tiny_envelope.png' title='Email' alt='envelope'></a>";
 	
 	var alias = member_object.alias;
 	
@@ -412,10 +436,13 @@ function renderMemberItem(group, member_object) {
 		
 		command_set.push(skill_display);
 	}
-	
+
+	// TODO
+//	member_object.modified
+//	member_object.set_by
 	
 	var full_name = fullname_cache[alias];
-	return "<li><span style='font-weight: bold'>" + full_name + "</span> (<span style='color: #008000'>" + alias + "</span>) [" + command_set.join(", ") +"]</li>";
+	return "<li>" + email_icon + " <span style='font-weight: bold' title='" + alias + "'>" + full_name + "</span> [" + command_set.join(", ") +"]</li>";
 }
 
 //============================================================================

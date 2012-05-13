@@ -5,6 +5,7 @@ function Group(label) {
 	this.member_objects_by_alias = {};
 	this.tags = [];
 	this.mine = true;
+	this.owner = null;
 	
 	this.is_self_serve = false;
 	this.is_public = true;

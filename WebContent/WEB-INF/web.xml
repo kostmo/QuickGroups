@@ -24,6 +24,6 @@
 
 	<login-config>
 		<auth-method>BASIC</auth-method>
-		<realm-name>JNDIRealm</realm-name>
+		<realm-name>QuickGroups</realm-name>
 	</login-config>
 </web-app>

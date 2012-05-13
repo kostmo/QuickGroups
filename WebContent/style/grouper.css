@@ -50,21 +50,29 @@ button.dirty_save_button:active {
 	border-radius: 5px;
     background-color: rgb(255,255,220);
 	padding: 0.3em;
+    overflow-y: scroll;
+    max-height: 500px;
+}
+
+#members_holder {
+	list-style-type: none;	
 }
 
 #group_list {
 	border-radius: 5px;
     background-color: rgb(120,120,255);
-	list-style-type: none;
 	margin: 0.5em;
 	padding: 0.5em;
+	list-style-type: none;
+    overflow-y: scroll;
+    max-height: 500px;
 }
 
 #group_list li {
 	background-color: rgb(200,200,255);
-	margin-top: .3em;
-	margin-bottom: .3em;
-	padding: .3em;
+	margin-top: .2em;
+	margin-bottom: .2em;
+	padding: .2em;
 	border-radius: 4px;
 }
 

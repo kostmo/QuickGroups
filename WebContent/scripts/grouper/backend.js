@@ -33,6 +33,7 @@ function reloadGroupData(completion_callback, callback_args) {
 				g.is_skill = group_as_dict["is_skill"];
 				g.tags = group_as_dict["tags"];
 				g.mine = group_as_dict["mine"];
+				g.owner = group_as_dict["owner"];
 
 				var members_as_dicts = group_as_dict["members_as_dicts"];
 				$.each(members_as_dicts, function(alias, member_as_dict) {
@@ -89,6 +90,10 @@ function gatherUnknownAliasesFromGroups() {
 	
 	var unknown_aliases = {};
 	$.each(group_objects_by_id, function(group_id, group_object) {
+		
+		if (!(group_object.owner in fullname_cache))
+			unknown_aliases[group_object.owner] = null;
+		
 		for ( var alias in group_object.member_objects_by_alias)
 			if (!(alias in fullname_cache))
 				unknown_aliases[alias] = null;
