@@ -10,7 +10,7 @@ $(function() {
 	
 	$('#group_label_editbox').editable(function(value, settings) {
 		
-		changeGroupName(value);
+		 changeGroupName(value);
 
 	     console.log(value);
 	     return value;
@@ -18,9 +18,7 @@ $(function() {
 	     type    : 'text',
 	     submit  : 'OK',
 	 });
-	
-	
-	
+
 	$( "#namefield" ).autocomplete({
 		source: function(request, response) {
 			$( "#hourglass_img" ).show();
@@ -86,6 +84,13 @@ $(function() {
 		renderGroups();
 	}, 4);
 });
+
+//============================================================================
+function changeGroupSort(radio_button) {
+//	alert($(radio_button).val());
+	
+	renderGroups();
+}
 
 //============================================================================
 function setupTagList(input_id, throbber_id, tag_adding_function) {
@@ -154,11 +159,19 @@ function toggle_merge_options(link_element) {
 //============================================================================
 function renderGroups() {
 
+
+	var group_sort_value = $('input:radio[name=group_sort_radio_group]:checked').val();
 	var sorted_dictionary_keys = getSortedDictionaryKeys(group_objects_by_id, function(dict, key) {
-		return dict[key].label.toLowerCase();
+		var group_object = dict[key];
+		if (group_sort_value == "alphabetical") {
+			return group_object.label.toLowerCase();
+		} else if (group_sort_value == "member_count") {
+			return -group_object.getMemberCount();
+		}
 	});
 	
-	var filter_criteria_value = $('tag_filter_criteria').val();
+	
+	var filter_criteria_value = $('#tag_filter_criteria').val();
 	
 	var shown_groups_member_objects = {};	// To remove duplicates, simulate a Set by using only the keys of a Hash
 	var group_count = 0;
@@ -188,7 +201,7 @@ function renderGroups() {
 		unique_filtered_member_count++;
 	});
 
-	$( "#filtered_groups_email_url" ).attr("href", getEmailLink(cumulative_member_objects));
+	$( "#filtered_groups_email_url" ).attr("href", getEmailLink(cumulative_member_objects, filter_tags.join(", ")));
 	$( "#group_list_header" ).html( "" + group_count + " Group(s), " + unique_filtered_member_count + " member(s)" );	
 	$( "#group_list" ).html( li_elements.join("") );
 	
@@ -203,14 +216,6 @@ function renderGroups() {
 			$( "#instructions_no_groups" ).hide();
 		}
 	}
-}
-
-//============================================================================
-function changeTagFilterCriteria(radio_button) {
-
-	var radio_button_value = $(radio_button).val();
-	
-	renderGroups();
 }
 
 //============================================================================
@@ -345,18 +350,22 @@ function showGroup(group_id) {
 	$( "#member_count" ).html( sorted_dictionary_keys.length + " member(s)." );
 	$( "#group_holder" ).html( html_string );
 
-	$( "#group_email_url" ).attr("href", getEmailLink(member_object_list));
+	$( "#group_email_url" ).attr("href", getEmailLink(member_object_list, group_object.label));
 }
 
 //============================================================================
-function getEmailLink(member_objects) {
+function getEmailLink(member_objects, subject) {
 	
 	var email_addresses = [];
 	$.each(member_objects, function(index, member_object) {
 		email_addresses.push(member_object.getEmailAddress());
 	});
 	
-	return "mailto:" + email_addresses.join(";");
+	var subject_extension = "";
+	if (subject != null)
+		subject_extension = "?Subject=" + subject;
+	
+	return "mailto:" + email_addresses.join(";") + subject_extension;
 }
 
 //============================================================================

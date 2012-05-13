@@ -37,8 +37,8 @@ var company_domain = "${company_domain}";
 	<table id="container">
 		<tr>
 			<td style="min-width: 250px"><span style="vertical-align: middle">Show groups with
-			<select onchange="changeTagFilterCriteria(this);" id="tag_filter_criteria">
-			<option value="any" selected="selected">Any</option>
+			<select onchange="renderGroups();" id="tag_filter_criteria">
+				<option value="any" selected="selected">Any</option>
 				<option value="all">All</option></select> tags:</span>
 
 				<div id="filter_tags_list"></div>
@@ -50,8 +50,7 @@ var company_domain = "${company_domain}";
 						id='filter_hourglass_img' src='images/square-ajax-loader.gif' />
 				</div><br />
 				
-				<button onclick="toggle_advanced_bulk_options(this)">Show
-					Advanced &gt;&gt;</button>
+				<button onclick="toggle_advanced_bulk_options(this)">Show Advanced &gt;&gt;</button>
 
 				<fieldset id="advanced_bulk_options" style="display: none">
 					<legend>Exporting</legend>
@@ -69,8 +68,7 @@ var company_domain = "${company_domain}";
 					<a id="query_url" href="blah">Machine query link</a>
 				</fieldset>
 				<br/>
-				
-				<a id="filtered_groups_email_url" href="mailto:">Send email to everyone in filtered groups</a>
+
 			</td>
 			<td style="min-width: 250px">
 
@@ -81,7 +79,15 @@ var company_domain = "${company_domain}";
 							style='display: none; vertical-align: middle;'
 							id='group_load_hourglass_img' src='images/square-ajax-loader.gif' />
 					</h3>
-					<button onclick='newGroup();'>New group</button>
+					
+					
+					<p><a id="filtered_groups_email_url" href="mailto:">Start a discussion with everyone in these groups</a></p>
+					
+					<button onclick='newGroup();'>New group</button><br/>
+					Sort by:
+					<label><input type="radio" onchange="changeGroupSort(this);" name="group_sort_radio_group" value="member_count" />Member count</label>
+					<label><input type="radio" onchange="changeGroupSort(this);" name="group_sort_radio_group" value="alphabetical" checked="checked"/>Alphabetical</label>
+
 					<ul id="group_list"></ul>
 
 				</div>
@@ -191,7 +197,7 @@ var company_domain = "${company_domain}";
 									<button onclick='exportGroup(active_group_id);'>Export</button>
 								</div>
 
-								<a id="group_email_url" href="mailto:">Send email to group</a>
+								<a id="group_email_url" href="mailto:">Start a discussion with the people in this group</a>
 							</fieldset>
 
 						</td>

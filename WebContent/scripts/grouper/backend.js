@@ -230,8 +230,6 @@ function removeGroupTag(tag) {
 // ============================================================================
 function newGroup() {
 
-	console.log("Making new group...");
-
 	active_group_id = -1;
 
 	if (active_group_id in group_objects_by_id) {
@@ -244,7 +242,8 @@ function newGroup() {
 
 	newgroup.markDirty();
 
-	$("#group_label").focus();
+//	$("#group_label_editbox").focus();
+	$("#group_label_editbox").click();
 }
 
 // ============================================================================
