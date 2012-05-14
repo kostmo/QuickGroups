@@ -5,14 +5,14 @@ function Group(label) {
 	this.member_objects_by_alias = {};
 	this.tags = [];
 	this.mine = true;
-	this.owner = null;
+	this.owner = logged_in_username;
 	
 	this.is_public = true;
 	this.is_self_serve = true;	// By default, newly created groups will be self-serve
 	this.is_skill = false;
 	
 	this.containsAlias = function(alias) {
-		return this.aliases.indexOf(alias) != -1;
+		return alias in this.member_objects_by_alias;
 	};
 	
 	this.removeAlias = function(alias) {

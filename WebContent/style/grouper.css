@@ -39,6 +39,13 @@ button.dirty_save_button:active {
     color: black;
 }
 
+.proficiency_chiclet {
+	border-radius: 4px;
+    background-color: rgb(255,220,150);
+    padding: 2px;
+    font-size: x-small;
+}
+
 .group_tag {
 	border-radius: 5px;
     background-color: rgb(255,220,150);

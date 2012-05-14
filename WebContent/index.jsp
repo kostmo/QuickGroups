@@ -171,6 +171,7 @@ var company_domain = "${company_domain}";
 
 					</fieldset>
 
+					<!--
 					<fieldset>
 						<legend>Group functions</legend>
 						<div>
@@ -178,9 +179,11 @@ var company_domain = "${company_domain}";
 						</div>
 
 					</fieldset>
+					-->
 
 				</div>
-						
+
+				<!--
 				<button onclick="toggle_advanced_bulk_options(this)">Show
 					Advanced &gt;&gt;</button>
 
@@ -199,7 +202,7 @@ var company_domain = "${company_domain}";
 					</p>
 					<a id="query_url" href="blah">Machine query link</a>
 				</fieldset>
-				
+ 				-->
 			</td>
 
 

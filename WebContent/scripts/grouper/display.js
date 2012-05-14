@@ -3,9 +3,9 @@ $(function() {
 
 	showGroup(null);
 	
-	var first_radio_element = $('input[name="export_radio_group"]')[0];
-	$(first_radio_element).attr('checked', true);
-	first_radio_element.onchange();
+//	var first_radio_element = $('input[name="export_radio_group"]')[0];
+//	$(first_radio_element).attr('checked', true);
+//	first_radio_element.onchange();
 
 	
 	$('#group_label_editbox').editable(function(value, settings) {
@@ -88,7 +88,9 @@ $(function() {
 
 //============================================================================
 function getInterpolatedCssColor(fraction) {
-	var red_green_span = fraction * 1/3;
+	
+	var USED_COLOR_CIRCLE_FRACTION = 1/3;
+	var red_green_span = USED_COLOR_CIRCLE_FRACTION * (1 - fraction);
 	return Color.hsl(red_green_span, 0.9, 0.7).hexTriplet();
 }
 
@@ -234,7 +236,7 @@ function renderGroups() {
 	});
 
 	$( "#filtered_groups_email_url" ).attr("href", getEmailLink(cumulative_member_objects, filter_tags.join(", ")));
-	$( "#group_list_header" ).html( "" + group_count + " group(s), " + unique_filtered_member_count + " people" );	
+	$( "#group_list_header" ).html( "" + group_count + " group(s), " + unique_filtered_member_count + " " + ((unique_filtered_member_count == 1) ? "person" : "people") );	
 	$( "#group_list" ).html( li_elements.join("") );
 	
 	if (!group_count) {
@@ -255,7 +257,11 @@ function renderGroupListItem(group_object, interpolation_fraction) {
 	var interpolated_color = getInterpolatedCssColor(interpolation_fraction);
 //	var style = " style='background-color: " + interpolated_color + ";'";	// TODO Use this rainbow coloring somewhere
 	var style = "";
-	return "<li title='id: " + group_object.id + "' " + style + " onclick='showGroup(" + group_object.id + ")'>" + group_object.label + " <b>(" + group_object.getMemberCount() + ")</b></li>";
+	var status_signifiers = [];
+	if (group_object.containsAlias(logged_in_username)) {
+		status_signifiers.push("<img style='vertical-align: middle' src='images/star.svg' width='16'/>");
+	}
+	return "<li title='id: " + group_object.id + "' " + style + " onclick='showGroup(" + group_object.id + ")'>" + group_object.label + " <b>(" + group_object.getMemberCount() + ")</b>" + status_signifiers.join(" ") + "</li>";
 }
 
 //============================================================================
@@ -366,8 +372,6 @@ function renderSingleGroupTagsList(group_object) {
 	$( "#group_tags_list" ).html(html_contents);
 }
 
-
-
 //============================================================================
 function showGroup(group_id) {
 
@@ -460,6 +464,7 @@ function renderTagItem(tag) {
 	if (this.editable)
 		remove_command = " <span class='remove_member' onclick='" + this.remove_function_name + "(\"" + tag + "\");'><img style='vertical-align: top' src='images/tiny_trashcan.png' title='Remove' alt='trash can'></span>";
 
+	// chiclet style
 	return "<span class='group_tag'>" + tag + remove_command + "</span>";
 }
 
@@ -483,7 +488,6 @@ function renderMemberItem(group, member_object) {
 	if (group.is_skill) {
 		
 		var skill_display = "";
-		
 		if (group.mine || (group.is_self_serve && is_me)) {
 			
 			skill_display += "<select title='Proficiency' onchange='updateRating(this, \"" + member_object.alias + "\")'>";
@@ -493,7 +497,12 @@ function renderMemberItem(group, member_object) {
 			skill_display += "</select>";
 
 		} else {
-			skill_display += proficiency_labels[member_object.proficiency]["name"]; 
+			// chiclet style
+			var proficiency_fraction = 1.0 * member_object.proficiency / Object.keys(proficiency_labels).length;
+			var css_color = Color.hsl(0, 0, 0.8).hexTriplet();
+			if (member_object.proficiency)
+				css_color = getInterpolatedCssColor(proficiency_fraction);
+			skill_display += "<span title='Proficiency' class='proficiency_chiclet' style='background-color: " + css_color + "'>" + proficiency_labels[member_object.proficiency]["name"] + "</span>";
 		}
 		
 		command_set.push(skill_display);
