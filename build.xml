@@ -36,7 +36,7 @@
 
     <delete dir="${dist.dir}/web/WEB-INF/classes" />
     <mkdir dir="${dist.dir}/web/WEB-INF/classes" />
-    <javac destdir="${dist.dir}/web/WEB-INF/classes" srcdir="src" debug="on" debuglevel="lines,vars,source">
+    <javac destdir="${dist.dir}/web/WEB-INF/classes" srcdir="src" debug="on" target="1.6" debuglevel="lines,vars,source">
         <classpath>
             <fileset dir="${dist.dir}/web/WEB-INF/lib">
                   <include name="**/*.jar" />

@@ -23,7 +23,6 @@
 		</auth-constraint>
 	</security-constraint>
 
-
 	<!-- Open up a URL for machine queries -->
 	<security-constraint>
 		<web-resource-collection>
