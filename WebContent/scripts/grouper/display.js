@@ -397,11 +397,9 @@ function showGroup(group_id) {
 	if (group_object.mine) {
 		$( "#maintainer_selector_area" ).show();
 		$( "#group_tags_selector_area" ).show();
-		$( "#add_member_input_area" ).show();
 	} else {
 		$( "#maintainer_selector_area" ).hide();
 		$( "#group_tags_selector_area" ).hide();
-		$( "#add_member_input_area" ).hide();
 	}
 	
 	
@@ -410,6 +408,7 @@ function showGroup(group_id) {
 	if (group_object.mine || group_object.is_self_serve) {
 		
 		$(".modifying_actions").removeAttr('disabled');
+		$( "#add_member_input_area" ).show();
 		
 		if (group_object.is_public) {
 			$( "#is_self_serve" ).removeAttr('disabled');
@@ -426,8 +425,10 @@ function showGroup(group_id) {
 			$( "#save_button" ).removeClass( "dirty_save_button" );
 		}
 
-	} else
+	} else {
 		$(".modifying_actions").attr("disabled", "disabled");
+		$( "#add_member_input_area" ).hide();
+	}
 
 	var sorted_dictionary_keys = getSortedGroupMemberKeys(group_object);
 
