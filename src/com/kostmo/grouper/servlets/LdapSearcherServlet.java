@@ -81,7 +81,7 @@ public class LdapSearcherServlet extends HttpServlet {
 //			System.out.println(searchResult.getEntryCount() + " entries returned.");
 			for (SearchResultEntry e : searchResult.getSearchEntries()) {
 				JSONObject result_entry = new JSONObject();
-				result_entry.put("value", e.getAttributeValue(attributes[0]));
+				result_entry.put("value", e.getAttributeValue(attributes[0]).toLowerCase());
 				result_entry.put("label", e.getAttributeValue(attributes[1]));
 				names.add(result_entry);
 			}

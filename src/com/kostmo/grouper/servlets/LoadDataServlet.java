@@ -81,7 +81,7 @@ public class LoadDataServlet extends HttpServlet {
 					g.group_members.addAll(group_members.values());
 					
 					JSONObject jo = g.asJsonObject();
-					jo.put("mine", g.owner.equals(request.getRemoteUser()));
+					jo.put("mine", g.owner.equalsIgnoreCase(request.getRemoteUser()));
 					json_group_array.add(jo);
 				}
 				

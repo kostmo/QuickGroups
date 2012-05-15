@@ -76,7 +76,7 @@ public class Group implements JsonSerializable {
 
 	public boolean hasMember(String alias) {
 		for (GroupMember group_member : group_members)
-			if (group_member.alias.equals(alias))
+			if (group_member.alias.equalsIgnoreCase(alias))
 				return true;
 		
 		return false;

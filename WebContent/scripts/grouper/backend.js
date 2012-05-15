@@ -5,6 +5,27 @@ var group_objects_by_id = {};
 var proficiency_labels = {};
 var filter_tags = [];
 
+var AUTOSAVE_TIMEOUT_MILLISECONDS = 2000;	// milliseconds
+//============================================================================
+function queueAutoSave(group_id) {
+	
+	$("#saving_status_indicator").text("Will autosave soon...");
+	$("#saving_status_indicator").show();
+
+	var active_group = group_objects_by_id[group_id];
+	if (active_group.autosave_timeout != null)
+		clearTimeout(active_group.autosave_timeout);
+		
+	active_group.autosave_timeout = setTimeout("saveGroup(" + group_id + ")", AUTOSAVE_TIMEOUT_MILLISECONDS);
+}
+
+//============================================================================
+function saveGroup(group_id) {
+	var active_group = group_objects_by_id[group_id];
+	active_group.autosave_timeout = null;
+	active_group.save();
+}
+
 //============================================================================
 function reloadGroupData(completion_callback, callback_args) {
 
@@ -277,43 +298,23 @@ function getActiveGroup() {
 	return group_objects_by_id[active_group_id];
 }
 
+//============================================================================
+//function modifyActiveGroupProperties() {
+//
+//	var new_group = getActiveGroup();
+//	
+//	new_group.is_public = $('#is_public').is(':checked');
+//	new_group.is_self_serve = $('#is_self_serve').is(':checked');
+//	new_group.is_skill = $('#is_skill').is(':checked');
+//
+//	new_group.markDirty();
+//}
+
 // ============================================================================
 function saveGroup() {
 
+	// TODO We could check for all dirty groups and implement a "Save All" command
+ 
 	var new_group = getActiveGroup();
-
-	new_group.is_public = $('#is_public').is(':checked');
-	new_group.is_self_serve = $('#is_self_serve').is(':checked');
-	new_group.is_skill = $('#is_skill').is(':checked');
-
-	// TODO We could check for all dirty groups and implement a "Save All"
-	// command
-	var groups = {};
-	groups[new_group.label] = new_group.asDictionary();
-
-	var action_type = new_group.id < 0 ? "insert" : "modify";
-	var jsonString = JSON.stringify(groups);
-	$.post("save", {
-		action : action_type,
-		json : jsonString,
-	}, function(data) {
-		if (data.success) {
-			
-			new_group.dirty = false;
-	
-			if (data.created_new_group) {
-	
-				var old_group_id = new_group.id;
-				new_group.id = data.new_group_id;
-				group_objects_by_id[new_group.id] = new_group;
-				new_group.mine = true;
-				delete group_objects_by_id[old_group_id];
-			}
-	
-			renderGroups();
-			showGroup(new_group.id);
-		} else {
-			alert("Failed:\n" + data.message);
-		}
-	});
+	new_group.save();
 }

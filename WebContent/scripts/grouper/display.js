@@ -14,7 +14,7 @@ $(function() {
 
 	     console.log(value);
 	     return value;
-	  }, { 
+	  }, {
 	     type    : 'text',
 	     submit  : 'OK',
 	 });
@@ -200,6 +200,7 @@ function renderGroups() {
 	
 	var filtered_group_objects = [];
 
+	var skills_only = $('#skills_filter_checkbox').is(':checked');
 	$.each(sorted_dictionary_keys, function(key_index, key_value) {
 
 		
@@ -209,7 +210,9 @@ function renderGroups() {
 		if (filter_tags.length > 0)
 			if (!filter_function.call(filter_tags, function(tag) {return group_object.tags.indexOf(tag) >= 0;}))
 				return;
-				
+
+		if (skills_only && !group_object.is_skill)
+			return;
 
 		// Gather unique members in the currently shown groups
 		$.each(group_object.member_objects_by_alias, function(alias, member_object) {
@@ -238,18 +241,6 @@ function renderGroups() {
 	$( "#filtered_groups_email_url" ).attr("href", getEmailLink(cumulative_member_objects, filter_tags.join(", ")));
 	$( "#group_list_header" ).html( "" + group_count + " group(s), " + unique_filtered_member_count + " " + ((unique_filtered_member_count == 1) ? "person" : "people") );	
 	$( "#group_list" ).html( li_elements.join("") );
-	
-	if (!group_count) {
-		$( "#instructions_no_groups" ).show();
-	} else {
-		
-		if (active_group_id == null) {
-			$( "#instructions_no_groups" ).text("Click on a group name to view or edit.");
-			$( "#instructions_no_groups" ).show();
-		} else {
-			$( "#instructions_no_groups" ).hide();
-		}
-	}
 }
 
 //============================================================================
@@ -321,6 +312,11 @@ function changeGroupName(new_group_name) {
 }
 
 //============================================================================
+function toggleSkillsFilter() {
+	renderGroups();
+}
+
+//============================================================================
 function renderGroupFilter() {
 	var html_contents = "&lt;<i>no tags selected</i>&gt;";
 	if (filter_tags.length) {
@@ -382,7 +378,6 @@ function showGroup(group_id) {
 		$( ".group_info_display" ).show();
 	}
 
-	
 	active_group_id = group_id;
 	
 	var group_object = getActiveGroup();
@@ -391,13 +386,25 @@ function showGroup(group_id) {
 	$( "#is_self_serve" ).attr('checked', group_object.is_self_serve);
 	$( "#is_skill" ).attr('checked', group_object.is_skill);
 
-	if (!group_object.is_skill) {
-		$( "#member_sort_criteria_wiget" ).hide();
-	} else {
+	if (group_object.is_skill) {
 		$( "#member_sort_criteria_wiget" ).show();
+	} else { 
+		$( "#member_sort_criteria_wiget" ).hide();
 	}
 	
-
+	// TODO Maintain a list of all fields that should be only be
+	// enabled when you are the group owner
+	if (group_object.mine) {
+		$( "#maintainer_selector_area" ).show();
+		$( "#group_tags_selector_area" ).show();
+		$( "#add_member_input_area" ).show();
+	} else {
+		$( "#maintainer_selector_area" ).hide();
+		$( "#group_tags_selector_area" ).hide();
+		$( "#add_member_input_area" ).hide();
+	}
+	
+	
 	renderSingleGroupTagsList(group_object);
 
 	if (group_object.mine || group_object.is_self_serve) {

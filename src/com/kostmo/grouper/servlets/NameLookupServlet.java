@@ -64,7 +64,7 @@ public class NameLookupServlet extends HttpServlet {
 			String ad_query_filter = "(|" + multi_name_query + ")";
 			SearchResult searchResult = LdapHelper.getGroupFileteredLdapSearchResult(ldap_properties, ad_query_filter);
 			for (SearchResultEntry e : searchResult.getSearchEntries())
-				names.put(e.getAttributeValue(attributes[0]), e.getAttributeValue(attributes[1]));
+				names.put(e.getAttributeValue(attributes[0]).toLowerCase(), e.getAttributeValue(attributes[1]));
 
 		} catch (LDAPException e) {
 			e.printStackTrace();

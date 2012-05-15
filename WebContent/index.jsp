@@ -18,7 +18,7 @@
 <link rel='stylesheet' type='text/css' href='style/grouper.css' />
 
 <script type="text/javascript">
-var logged_in_username = "<%=request.getRemoteUser()%>";
+var logged_in_username = "<%=request.getRemoteUser().toLowerCase()%>";
 var company_domain = "${company_domain}";
 </script>
 
@@ -29,11 +29,7 @@ var company_domain = "${company_domain}";
 		Logged in as <b><%=request.getRemoteUser()%></b>
 	</div>
 
-
-	<span class="main_instructions" id="instructions_no_groups"
-		style="display: none">Click "New group" to begin.</span>
 	<span class="status_message" id="status_message">Loading...</span>
-
 
 	<table id="container">
 		<tr>
@@ -55,6 +51,9 @@ var company_domain = "${company_domain}";
 						style='display: none; vertical-align: middle;'
 						id='filter_hourglass_img' src='images/square-ajax-loader.gif' />
 				</div>
+				
+				<label><input onchange="toggleSkillsFilter();" id='skills_filter_checkbox'
+									type='checkbox' /> Skills only</label>
 
 				<div id="outer_grouplist_container">
 
@@ -128,11 +127,17 @@ var company_domain = "${company_domain}";
 
 						<p><span id="group_tags_list"></span></p>
 						<div class='ui-widget'>
+						
+						<div id="group_tags_selector_area">
 							<label for='group_tag_input'>Add Tag: </label><input
 								class="modifying_actions" id='group_tag_input' /> <img
 								style='display: none; vertical-align: middle;'
 								id='group_tag_hourglass_img'
-								src='images/square-ajax-loader.gif' /> <a href="taglist">All tags</a>
+								src='images/square-ajax-loader.gif' />
+								
+								
+						</div>
+								<a href="taglist">See all tags</a>
 						</div>
 					</fieldset>
 
@@ -141,6 +146,7 @@ var company_domain = "${company_domain}";
 						<p>
 						<span id="current_group_maintainer" style="font-weight: bold">Nobody</span>
 						</p>
+						<div id="maintainer_selector_area">
 						Select new maintainer:
 						<div class='ui-widget'>
 							<label for='maintainer_field'></label><input
@@ -152,11 +158,14 @@ var company_domain = "${company_domain}";
 								onclick='transferOwnership($("#maintainer_field").val());'>Transfer
 								ownership</button>
 						</div>
+						</div>
 
 					</fieldset>
 
 					<fieldset>
 						<legend>Group manipulation</legend>
+						<span id="saving_status_indicator" style="display: none">Saving...</span><br/>
+
 						<button class="modifying_actions"
 							onclick='saveGroup(active_group_id);' id="save_button">Save</button>
 						<button onclick='copyGroup(active_group_id);'>Copy</button>
@@ -208,15 +217,17 @@ var company_domain = "${company_domain}";
 
 			<td style="min-width: 250px">
 
-
 				<div class="group_info_display" style="display: none">
 
-					<div class='ui-widget'>
+					<div id="add_member_input_area" class='ui-widget'>
 						<label for='namefield'>Add Member: </label><input
 							class="modifying_actions" id='namefield' /> <img
 							style='display: none; vertical-align: middle;'
 							id='hourglass_img' src='images/square-ajax-loader.gif' />
 					</div>
+					
+					<!-- NOTE: It's more useful to always search both the "alias" and "name"
+						fields by default. Therefore, it simplifies the inteferface to keep this option hidden. -->
 					<div id="search_filter_criteria" style="display: none">
 						Search by: <label><input type="radio"
 							name="search_by_radio_group" value="alias" />Alias</label> <label><input

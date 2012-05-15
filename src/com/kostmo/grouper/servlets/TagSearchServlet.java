@@ -38,7 +38,7 @@ public class TagSearchServlet extends HttpServlet {
 
 	void writeGrouperPage(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-		String partial_tag = request.getParameter("term");
+		String partial_tag = request.getParameter("term").toLowerCase();
 		Connection postgres_connection = PostgresData.getPostgresConnection(this);
 		JSONArray results = PostgresData.searchTags(postgres_connection, partial_tag);
 

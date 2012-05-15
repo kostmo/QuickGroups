@@ -10,10 +10,6 @@ fieldset {
 	float: right;
 }
 
-.main_instructions {
-	font-family: serif;
-}
-
 .status_message {
 	font-family: serif;
 	display: block;

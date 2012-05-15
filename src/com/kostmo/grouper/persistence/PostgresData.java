@@ -196,7 +196,7 @@ public class PostgresData {
 		if (rs.next()) {
 			boolean is_public = rs.getBoolean("is_public");
 			String owner = rs.getString("owner").trim();
-			if ( !(owner.equals(new_owner) || is_public) )
+			if ( !(owner.equalsIgnoreCase(new_owner) || is_public) )
 				throw new SQLException("Refusing to copy; user is not the owner and group is not public.");
 		} else
 			throw new SQLException("Could not find source group.");
@@ -241,7 +241,7 @@ public class PostgresData {
 	// ========================================================================
 	public static void makeTagAssociations(Connection con, Collection<String> tags, long group_id, String owner) throws SQLException {
 
-		PreparedStatement tag_existence_query = con.prepareStatement("SELECT id FROM tags WHERE btrim(label)=?");
+		PreparedStatement tag_existence_query = con.prepareStatement("SELECT id FROM tags WHERE btrim(label) LIKE ?");
 
 		String tag_insertion_query = "INSERT INTO \"tags\" (label, creator) VALUES (?, ?)";
 		PreparedStatement tag_insertion_statement = con.prepareStatement(tag_insertion_query, Statement.RETURN_GENERATED_KEYS);
@@ -258,7 +258,7 @@ public class PostgresData {
 		// Insert new tags, make tag-group associations
 		for (String tag : tags) {
 
-			tag_existence_query.setString(1, tag);
+			tag_existence_query.setString(1, tag.toLowerCase());
 			ResultSet rs_existence = tag_existence_query.executeQuery();
 			long tag_id = -1;
 			while (rs_existence.next()) {
@@ -266,7 +266,7 @@ public class PostgresData {
 			}
 			
 			if (tag_id < 0) {
-				tag_insertion_statement.setString(1, tag);
+				tag_insertion_statement.setString(1, tag.toLowerCase());
 				int status_tag_insertion = tag_insertion_statement.executeUpdate();
 
 				ResultSet rs_insertion = tag_insertion_statement.getGeneratedKeys();
@@ -414,7 +414,7 @@ public class PostgresData {
 		Group group_in_database = loadSingleGroup(con, modified_group.id);
 		if (group_in_database != null) {
 
-			if ( !(group_in_database.owner.equals(modified_group.owner) || (group_in_database.is_public && group_in_database.is_self_serve)) ) {
+			if ( !(group_in_database.owner.equalsIgnoreCase(modified_group.owner) || (group_in_database.is_public && group_in_database.is_self_serve)) ) {
 				System.out.println("Refusing to update; user is not the owner and group is not public and self-serve.");
 				return false;
 			}
@@ -425,7 +425,7 @@ public class PostgresData {
 		}
 
 
-		if ( group_in_database.owner.equals(modified_group.owner) ) {
+		if ( group_in_database.owner.equalsIgnoreCase(modified_group.owner) ) {
 
 			// Only the owner of the group can update group metadata.
 			String group_update_query = "UPDATE \"groups\" SET label=?, is_public=?, is_self_serve=?, is_skill=? WHERE id=?";
@@ -464,7 +464,7 @@ public class PostgresData {
 		// Makes sure source group is owned by the current user
 		Group group_in_database = loadSingleGroup(con, group_id);
 		if (group_in_database != null) {
-			if ( !(group_in_database.owner.equals(current_user)) )
+			if ( !(group_in_database.owner.equalsIgnoreCase(current_user)) )
 				throw new SQLException("Refusing to transfer ownership; user is not the owner.");
 		} else
 			throw new SQLException("Could not find group to update in database.");
@@ -486,7 +486,7 @@ public class PostgresData {
 		// Makes sure source group is owned by the current user
 		Group group_in_database = loadSingleGroup(con, group_id);
 		if (group_in_database != null) {
-			if ( !(group_in_database.owner.equals(current_user)) )
+			if ( !(group_in_database.owner.equalsIgnoreCase(current_user)) )
 				throw new SQLException("Refusing to delete; user is not the owner and group.");
 		} else
 			throw new SQLException("Could not find group to update in database.");
