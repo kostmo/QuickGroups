@@ -100,7 +100,7 @@ function Group(label) {
 		
 					var old_group_id = group_object_reference.id;
 					group_object_reference.id = data.new_group_id;
-					group_objects_by_id[group_object_reference.id] = new_group;
+					group_objects_by_id[group_object_reference.id] = group_object_reference;
 					group_object_reference.mine = true;
 					delete group_objects_by_id[old_group_id];
 				}

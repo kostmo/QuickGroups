@@ -283,6 +283,13 @@ function deleteGroup(group_id) {
 			group_id : group_id,
 		}, function(data) {
 			console.log("Deletion success: " + data.success);
+			if (data.success) {
+
+				console.log("Successfully deleted.");
+				
+			} else {
+				alert("Error: " + data.message);
+			}
 		});
 	}
 

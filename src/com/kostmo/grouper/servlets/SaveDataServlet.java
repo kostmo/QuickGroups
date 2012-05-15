@@ -109,6 +109,7 @@ public class SaveDataServlet extends HttpServlet {
 		String new_owner = request.getParameter("new_owner");
 
 		JSONObject json_output_object = new JSONObject();
+		json_output_object.put("success", false);
 		try {
 			Connection postgres_connection = PostgresData.getPostgresConnection(this);
 			PostgresData.bequeathGroup(postgres_connection, group_id, request.getRemoteUser(), new_owner);
@@ -140,6 +141,7 @@ public class SaveDataServlet extends HttpServlet {
 		
 
 		JSONObject json_output_object = new JSONObject();
+		json_output_object.put("success", false);
 		try {
 			Connection postgres_connection = PostgresData.getPostgresConnection(this);
 			PostgresData.deleteGroup(postgres_connection, group_id, request.getRemoteUser());
@@ -176,6 +178,7 @@ public class SaveDataServlet extends HttpServlet {
 
 
 		JSONObject json_output_object = new JSONObject();
+		json_output_object.put("success", false);
 		try {
 			Connection postgres_connection = PostgresData.getPostgresConnection(this);
 			
@@ -222,6 +225,7 @@ public class SaveDataServlet extends HttpServlet {
 
 		
 		JSONObject json_output_object = new JSONObject();
+		json_output_object.put("success", false);
 		try {
 			Connection postgres_connection = PostgresData.getPostgresConnection(this);
 			
@@ -231,7 +235,7 @@ public class SaveDataServlet extends HttpServlet {
 				PostgresData.updateGroup(postgres_connection, Group.newFromJSON(group_json_object, request.getRemoteUser()));
 			}
 			
-			json_output_object.put("success", new Boolean(true));
+			json_output_object.put("success", true);
 
 		} catch (SQLException e) {
 			e.printStackTrace();
