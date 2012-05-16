@@ -19,6 +19,7 @@ import org.json.simple.parser.ParseException;
 import com.kostmo.grouper.LdapHelper.MisconfigurationException;
 import com.kostmo.grouper.persistence.Group;
 import com.kostmo.grouper.persistence.PostgresData;
+import com.kostmo.grouper.persistence.PostgresData.PermissionsException;
 
 @WebServlet("/save")
 public class SaveDataServlet extends HttpServlet {
@@ -157,6 +158,9 @@ public class SaveDataServlet extends HttpServlet {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 			json_output_object.put("message", e.getMessage());
+		} catch (PermissionsException e) {
+			e.printStackTrace();
+			json_output_object.put("message", e.getMessage());
 		}
 
 		return json_output_object;
@@ -230,9 +234,8 @@ public class SaveDataServlet extends HttpServlet {
 			Connection postgres_connection = PostgresData.getPostgresConnection(this);
 			
 			for (Object entry : json_input_object.keySet()) {
-
 				JSONObject group_json_object = (JSONObject) json_input_object.get(entry);
-				PostgresData.updateGroup(postgres_connection, Group.newFromJSON(group_json_object, request.getRemoteUser()));
+				PostgresData.updateGroup(postgres_connection, Group.newFromJSON(group_json_object, request.getRemoteUser()), request.getRemoteUser());
 			}
 			
 			json_output_object.put("success", true);
@@ -244,6 +247,9 @@ public class SaveDataServlet extends HttpServlet {
 			e.printStackTrace();
 			json_output_object.put("message", e.getMessage());
 		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			json_output_object.put("message", e.getMessage());
+		} catch (PermissionsException e) {
 			e.printStackTrace();
 			json_output_object.put("message", e.getMessage());
 		}

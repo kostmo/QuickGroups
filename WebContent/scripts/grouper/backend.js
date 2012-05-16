@@ -266,9 +266,11 @@ function newGroup() {
 	var newgroup = new Group("New Group");
 	group_objects_by_id[active_group_id] = newgroup;
 
-	newgroup.markDirty();
-
-//	$("#group_label_editbox").focus();
+	
+//	newgroup.markDirty();	// Don't kick off the autosave immediately
+	newgroup.dirty = true;
+	showGroup(active_group_id);
+	
 	$("#group_label_editbox").click();
 }
 
@@ -287,17 +289,18 @@ function deleteGroup(group_id) {
 
 				console.log("Successfully deleted.");
 				
+				active_group_id = null;
+				delete group_objects_by_id[group_id];
+				renderGroups();
+
+				showGroup(null);
+				
+				
 			} else {
 				alert("Error: " + data.message);
 			}
 		});
 	}
-
-	active_group_id = null;
-	delete group_objects_by_id[group_id];
-	renderGroups();
-
-	showGroup(null);
 }
 
 // ============================================================================

@@ -359,7 +359,7 @@ public class PostgresData {
 	}
 	
 	// ========================================================================
-	public static void reconcileGroupMembers(Connection con, Group modified_group) throws SQLException {
+	public static void reconcileGroupMembers(Connection con, Group modified_group, String alias_restriction) throws SQLException {
 
 		Map<String, GroupMember> existing_group_members = loadGroupMembers(con, modified_group.id);
 		
@@ -369,9 +369,12 @@ public class PostgresData {
 		for (GroupMember existing_member : existing_group_members.values()) {
 			if ( !modified_group.hasMember(existing_member.alias) ) {
 
-				member_deletion_statement.setLong(1, modified_group.id);
-				member_deletion_statement.setString(2, existing_member.alias);
-				int status1 = member_deletion_statement.executeUpdate();
+				if (alias_restriction == null || existing_member.alias.equalsIgnoreCase(alias_restriction)) {
+				
+					member_deletion_statement.setLong(1, modified_group.id);
+					member_deletion_statement.setString(2, existing_member.alias);
+					int status1 = member_deletion_statement.executeUpdate();
+				}
 			}
 		}
 
@@ -387,41 +390,56 @@ public class PostgresData {
 		for (GroupMember member : modified_group.group_members) {
 			if (!existing_group_members.keySet().contains(member.alias)) {
 
-				member_insertion_statement.setString(1, member.alias);
-				member_insertion_statement.setLong(2, member.group_id);
-				member_insertion_statement.setString(3, member.set_by);
-				member_insertion_statement.setInt(4, member.proficiency);
+
+				if (alias_restriction == null || member.alias.equalsIgnoreCase(alias_restriction)) {
 				
-				System.out.println(member.alias + " is a new member of group \"" + modified_group.label + "\". Proficiency: " + member.proficiency);
+					member_insertion_statement.setString(1, member.alias);
+					member_insertion_statement.setLong(2, member.group_id);
+					member_insertion_statement.setString(3, member.set_by);
+					member_insertion_statement.setInt(4, member.proficiency);
+					
+					System.out.println(member.alias + " is a new member of group \"" + modified_group.label + "\". Proficiency: " + member.proficiency);
+					
+					int status2 = member_insertion_statement.executeUpdate();
 				
-				int status2 = member_insertion_statement.executeUpdate();
-				
+				}
+					
 			} else {
 
-				member_update_statement.setInt(1, member.proficiency);
-				member_update_statement.setString(2, member.alias);
-				member_update_statement.setLong(3, member.group_id);
+
+				if (alias_restriction == null || member.alias.equalsIgnoreCase(alias_restriction)) {
 				
-				int status2 = member_update_statement.executeUpdate();
+					member_update_statement.setInt(1, member.proficiency);
+					member_update_statement.setString(2, member.alias);
+					member_update_statement.setLong(3, member.group_id);
+					
+					int status2 = member_update_statement.executeUpdate();
+				}
 			}
+		}
+	}
+
+	// ========================================================================
+	public static class PermissionsException extends Exception {
+		PermissionsException(String msg) {
+			super(msg);
 		}
 	}
 	
 	// ========================================================================
-	public static boolean updateGroup(Connection con, Group modified_group) throws SQLException {
+	public static boolean updateGroup(Connection con, Group modified_group, String user_alias) throws SQLException, PermissionsException {
 
 		// Makes sure source group is either public or owned by the current user
 		Group group_in_database = loadSingleGroup(con, modified_group.id);
 		if (group_in_database != null) {
 
 			if ( !(group_in_database.owner.equalsIgnoreCase(modified_group.owner) || (group_in_database.is_public && group_in_database.is_self_serve)) ) {
-				System.out.println("Refusing to update; user is not the owner and group is not public and self-serve.");
-				return false;
+
+				throw new PermissionsException("Refusing to update; user is not the owner and group is not public and self-serve.");
 			}
 
 		} else {
-			System.err.println("Could not find group to update in database.");
-			return false;
+			throw new SQLException("Could not find group to update in database.");
 		}
 
 
@@ -439,15 +457,17 @@ public class PostgresData {
 
 			int status = group_update_statement.executeUpdate();
 
-			reconcileGroupMembers(con, modified_group);
+			reconcileGroupMembers(con, modified_group, null);
 			reconcileGroupTags(con, modified_group);
 
 		} else if (group_in_database.is_public && group_in_database.is_self_serve) {
 			// If you are not the owner, you can only add or remove yourself, and only then
 			// if the group is both public and self-serve.
 
-			// TODO
-			System.err.println("Not implemented yet.");
+			
+			reconcileGroupMembers(con, modified_group, user_alias);
+
+//			throw new PermissionsException("Not implemented yet.");
 
 		} else {
 			return false;
@@ -481,13 +501,13 @@ public class PostgresData {
 	}
 	
 	// ========================================================================
-	public static void deleteGroup(Connection con, long group_id, String current_user) throws SQLException {
+	public static void deleteGroup(Connection con, long group_id, String current_user) throws SQLException, PermissionsException {
 
 		// Makes sure source group is owned by the current user
 		Group group_in_database = loadSingleGroup(con, group_id);
 		if (group_in_database != null) {
 			if ( !(group_in_database.owner.equalsIgnoreCase(current_user)) )
-				throw new SQLException("Refusing to delete; user is not the owner and group.");
+				throw new PermissionsException("Refusing to delete; user is not the owner of group.");
 		} else
 			throw new SQLException("Could not find group to update in database.");
 
