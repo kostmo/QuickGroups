@@ -24,14 +24,15 @@
       </li>
 		<li>Skills inventory: broadcasting available skills in an organization</li>
 		<li>Dynamic groups that change faster than it would take the AD admin(s) to update them</li>
+		<li>Web API to use groups as Access Control Lists for other applications</li>
 	</ul>
 
 	<h2>Design Goals / Motivation</h2>
 	<ul>
 		<li>Distributed-maintenance</li>
-		<li>Avoids AD administrator turnaround time</li>
-		<li>Lighter-weight and less "official" than actual AD groups</li>
-		<li>"Lighter-weight" than <a href="https://en.wikipedia.org/wiki/GNU_Mailman">GNU Mailman</a> mailing lists</li>
+		<li>Avoids the bureaucracy and turnaround time involved in modifying AD grups</li>
+		<li>"Lighter-weight" and less "official" than actual AD groups</li>
+		<li>Lighter-weight than <a href="https://en.wikipedia.org/wiki/GNU_Mailman">GNU Mailman</a> mailing lists</li>
 		<li>Group creation does not require AD administrator approval</li>
 		<li>Could be used for "drafting" true AD groups
 			<ul>
@@ -58,10 +59,7 @@
 		"discussion list" software, with the ability to send and store
 		messages. Rather, it shall only be a method of obtaining lists of
 		people for which to communicate by other means.</p>
-	<h2>Features</h2>
-	<ul>
-		<li>Should be able to whitelist who can edit a particular group</li>
-	</ul>
+
 
 	<h2>TODO</h2>
 	<ul>
