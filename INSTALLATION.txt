@@ -4,23 +4,76 @@ INSTALLATION
 Perform these sections in order.
 
 
+
+Prerequisite Software
+---------------------
+sudo apt-get install postgresql tomcat7 apache2
+
+You may want to install the "pgadmin3" to test database connectivity and inspect database contents.
+
+
 Database
 --------
-* Install PostgreSQL server
 
-sudo apt-get install postgresql-9.1
 sudo su postgres
 psql template1
 CREATE USER group_manager_user WITH PASSWORD 'hunter2';
+
+CREATE GROUP group_manager_group
+
 CREATE DATABASE groupmanager;
 GRANT ALL PRIVILEGES ON DATABASE groupmanager to group_manager_user;
 
-CTRL+D (to exit)
+CTRL+D (to exit psql shell)
+CTRL+D (to exit postgres user's shell)
+
+
+
+edit the /etc/postgresql/9.1/main/postgresql.conf file, uncommenting the "listen_addresses" line and setting the value to '*':
+listen_addresses = '*'
+
+
+Add lines to the access control list in "/etc/postgresql/9.1/main/pg_hba.conf" for the IP ranges you with to allow:
+host     all     all     257.257.0.0/16    md5
+
+
+Restart the server:
+sudo /etc/init.d/postgresql restart
 
 
 * Run the SQL scripts
-
 psql --username group_manager_user --file create_tables.sql groupmanager
+
+
+Tomcat/Apache
+-----------------
+
+Create a new file "/etc/apache2/sites-available/tomcat" with the following contents:
+
+#######################################3
+<VirtualHost *:80>
+
+        JkMount /* tomcat
+
+        ServerName quickgroups.example.com
+        ServerAdmin me@example.com
+        ErrorLog /var/log/tomcat/logs/error.log
+        CustomLog /var/log/tomcat/logs/access.log common
+
+</VirtualHost>
+
+JkWorkersFile /etc/apache2/workers.properties
+
+JkShmFile     /var/log/apache2/mod_jk.shm
+JkLogFile     /var/log/apache2/mod_jk.log
+JkLogLevel    error
+JkLogStampFormat "[%a %b %d %H:%M:%S %Y] "
+
+
+#######################################3
+Restart the apache server:
+
+sudo service apache2 restart
 
 
 
@@ -41,4 +94,7 @@ There should be a tomcat installation on your system from which to obtain tomcat
 To generate the .war file, run:
 ant
 
-Then copy the .war file into your tomcat installation's webapps folder.
+Then copy the .war file into your tomcat installation's webapps folder. If the server.xml file is set up correctly,
+it should automatically extract the .war file to a directory. In some cases, you may need to restart tomcat:
+
+sudo service tomcat7 restart

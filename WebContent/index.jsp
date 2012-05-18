@@ -40,7 +40,7 @@ var company_domain = "${company_domain}";
 						onchange="renderGroups();" id="tag_filter_criteria">
 							<option value="any" selected="selected">any</option>
 							<option value="all">all</option>
-					</select> of these tags:
+					</select> of these <a href="taglist">tags</a>:
 				</span>
 
 				<div id="filter_tags_list" style="margin-top: 0.4em; margin-bottom: 0.4em"></div>
