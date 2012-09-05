@@ -427,13 +427,15 @@ public class PostgresData {
 	}
 	
 	// ========================================================================
-	public static boolean updateGroup(Connection con, Group modified_group, String user_alias) throws SQLException, PermissionsException {
+	public static boolean updateGroup(Connection con, Collection<String> admin_aliases, Group modified_group, String user_alias) throws SQLException, PermissionsException {
 
 		// Makes sure source group is either public or owned by the current user
 		Group group_in_database = loadSingleGroup(con, modified_group.id);
 		if (group_in_database != null) {
 
-			if ( !(group_in_database.owner.equalsIgnoreCase(modified_group.owner) || (group_in_database.is_public && group_in_database.is_self_serve)) ) {
+			if ( !(group_in_database.owner.equalsIgnoreCase(modified_group.owner) ||
+					(group_in_database.is_public && group_in_database.is_self_serve) ||
+					admin_aliases.contains(user_alias)) ) {
 
 				throw new PermissionsException("Refusing to update; user is not the owner and group is not public and self-serve.");
 			}

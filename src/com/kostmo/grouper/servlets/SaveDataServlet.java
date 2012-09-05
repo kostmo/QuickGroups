@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -26,9 +28,12 @@ public class SaveDataServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 
+	Collection<String> admin_aliases = new ArrayList<String>();
+	
 	@Override
 	public void init() throws ServletException {
 
+		admin_aliases.add("kostmo");	// FIXME
 	}
 
 	// ========================================================================
@@ -235,7 +240,7 @@ public class SaveDataServlet extends HttpServlet {
 			
 			for (Object entry : json_input_object.keySet()) {
 				JSONObject group_json_object = (JSONObject) json_input_object.get(entry);
-				PostgresData.updateGroup(postgres_connection, Group.newFromJSON(group_json_object, request.getRemoteUser()), request.getRemoteUser());
+				PostgresData.updateGroup(postgres_connection, admin_aliases, Group.newFromJSON(group_json_object, request.getRemoteUser()), request.getRemoteUser());
 			}
 			
 			json_output_object.put("success", true);

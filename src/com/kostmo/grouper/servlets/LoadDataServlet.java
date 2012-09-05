@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -25,10 +27,12 @@ import com.kostmo.grouper.persistence.PostgresData;
 public class LoadDataServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
+	Collection<String> admin_aliases = new ArrayList<String>();
 
 	@Override
 	public void init() throws ServletException {
 
+		admin_aliases.add("kostmo");	// FIXME
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -41,6 +45,10 @@ public class LoadDataServlet extends HttpServlet {
 
 		JSONObject json_output_object = new JSONObject();
 		json_output_object.put("success", false);
+		
+		
+		
+		json_output_object.put("user_is_admin", admin_aliases.contains(request.getRemoteUser()));
 		
 		JSONArray json_group_array = new JSONArray();
 		

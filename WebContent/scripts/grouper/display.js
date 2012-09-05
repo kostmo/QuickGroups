@@ -337,7 +337,10 @@ function getSortedGroupMemberKeys(group_object) {
 	var member_sort_value = $('input:radio[name=members_sort_radio_group]:checked').val();
 	
 	var alphabetical_sorting_function = function(dict, key) {
-		return fullname_cache[key].toLowerCase();
+		if (key in fullname_cache)
+			return fullname_cache[key].toLowerCase();
+		else
+			return "";
 	};
 	
 	var proficiency_sorting_function = function(dict, key) {
@@ -394,7 +397,7 @@ function showGroup(group_id) {
 	
 	// TODO Maintain a list of all fields that should be only be
 	// enabled when you are the group owner
-	if (group_object.mine) {
+	if (group_object.mine || user_is_admin) {
 		$( "#maintainer_selector_area" ).show();
 		$( "#group_tags_selector_area" ).show();
 	} else {
@@ -405,7 +408,7 @@ function showGroup(group_id) {
 	
 	renderSingleGroupTagsList(group_object);
 
-	if (group_object.mine || group_object.is_self_serve) {
+	if (group_object.mine || group_object.is_self_serve || user_is_admin) {
 		
 		$(".modifying_actions").removeAttr('disabled');
 		$( "#add_member_input_area" ).show();
@@ -489,7 +492,7 @@ function renderMemberItem(group, member_object) {
 	if (is_me)
 		command_text = "Remove myself";
 	
-	if (group.mine || (group.is_self_serve && is_me)) {
+	if (group.mine || (group.is_self_serve && is_me) || user_is_admin) {
 		command_set.push("<span class='remove_member' onclick='removeMember(\"" + alias + "\");'><img style='vertical-align: middle' src='images/tiny_trashcan.png' title='" + command_text + "' alt='trash can'></span>");
 	}
 	

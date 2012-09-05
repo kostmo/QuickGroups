@@ -5,6 +5,8 @@ var group_objects_by_id = {};
 var proficiency_labels = {};
 var filter_tags = [];
 
+var user_is_admin = false;
+
 var AUTOSAVE_TIMEOUT_MILLISECONDS = 2000;	// milliseconds
 //============================================================================
 function queueAutoSave(group_id) {
@@ -43,6 +45,8 @@ function reloadGroupData(completion_callback, callback_args) {
 		proficiency_labels = {};
 		
 		if (data.success) {
+			
+			user_is_admin = data.user_is_admin;
 			
 			proficiency_labels = data.proficiency_labels;
 			
